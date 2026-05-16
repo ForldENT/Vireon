@@ -14,12 +14,20 @@ function saveMarket(data) {
   fs.writeFileSync(MARKET_FILE, JSON.stringify(data, null, 2));
 }
 function loadUsers() {
+  if (!fs.existsSync(USERS_FILE)) {
+    fs.mkdirSync(path.dirname(USERS_FILE), { recursive: true });
+    fs.writeFileSync(USERS_FILE, '{}');
+  }
   return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
 }
 function saveUsers(data) {
   fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2));
 }
 function loadNews() {
+  if (!fs.existsSync(NEWS_FILE)) {
+    fs.mkdirSync(path.dirname(NEWS_FILE), { recursive: true });
+    fs.writeFileSync(NEWS_FILE, '[]');
+  }
   return JSON.parse(fs.readFileSync(NEWS_FILE, 'utf8'));
 }
 function saveNews(data) {
