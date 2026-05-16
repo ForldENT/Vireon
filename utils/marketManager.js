@@ -34,6 +34,20 @@ function saveNews(data) {
   fs.writeFileSync(NEWS_FILE, JSON.stringify(data, null, 2));
 }
 function loadConfig() {
+  if (!fs.existsSync(CONFIG_FILE)) {
+    fs.mkdirSync(path.dirname(CONFIG_FILE), { recursive: true });
+    const defaultConfig = {
+      startingBalance: 10000000,
+      newsChannelId: null,
+      stockChannelId: null,
+      adminRoleId: null,
+      marketOpenHour: 9,
+      marketCloseHour: 18,
+      dailyNewsCount: 3,
+      maxSingleTradePercent: 30
+    };
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify(defaultConfig, null, 2));
+  }
   return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
 }
 function saveConfig(data) {
