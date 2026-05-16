@@ -1,0 +1,10 @@
+{
+  "startingBalance": 10000000,
+  "newsChannelId": null,
+  "stockChannelId": null,
+  "adminRoleId": null,
+  "marketOpenHour": 9,
+  "marketCloseHour": 18,
+  "dailyNewsCount": 3,
+  "maxSingleTradePercent": 30
+}
