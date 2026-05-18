@@ -1,8 +1,8 @@
 {
   "companies": {
-    "NXCORP": {
-      "id": "NXCORP",
-      "name": "NexaCorp Technologies",
+    "사성": {
+      "id": "사성",
+      "name": "사성 전자",
       "type": "stock",
       "sector": "기술",
       "emoji": "💻",
@@ -18,9 +18,9 @@
       "createdAt": "2024-01-01",
       "isAdmin": false
     },
-    "SKYAIR": {
-      "id": "SKYAIR",
-      "name": "SkyAir Holdings",
+    "에어프라이기": {
+      "id": "에어프라이기",
+      "name": "에어프라이기 항공",
       "type": "stock",
       "sector": "항공",
       "emoji": "✈️",
@@ -36,9 +36,9 @@
       "createdAt": "2024-01-01",
       "isAdmin": false
     },
-    "GREENRG": {
-      "id": "GREENRG",
-      "name": "GreenEnergy Solutions",
+    "헤이닉스": {
+      "id": "헤이닉스",
+      "name": "헤이닉스 에너지",
       "type": "stock",
       "sector": "에너지",
       "emoji": "🌱",
@@ -54,9 +54,9 @@
       "createdAt": "2024-01-01",
       "isAdmin": false
     },
-    "MEDBIO": {
-      "id": "MEDBIO",
-      "name": "MedBio Pharma",
+    "바이오하자드": {
+      "id": "바이오하자드",
+      "name": "바이오하자드 제약",
       "type": "stock",
       "sector": "바이오",
       "emoji": "🧬",
@@ -72,9 +72,9 @@
       "createdAt": "2024-01-01",
       "isAdmin": false
     },
-    "AUTODRV": {
-      "id": "AUTODRV",
-      "name": "AutoDrive Motors",
+    "때슬라": {
+      "id": "때슬라",
+      "name": "때슬라 모터스",
       "type": "stock",
       "sector": "자동차",
       "emoji": "🚗",
@@ -92,9 +92,9 @@
     }
   },
   "coins": {
-    "NXCOIN": {
-      "id": "NXCOIN",
-      "name": "NexaCoin",
+    "비트박스 코인": {
+      "id": "비트박스 코인",
+      "name": "비트박스 코인",
       "type": "coin",
       "sector": "레이어1",
       "emoji": "🔷",
@@ -110,9 +110,9 @@
       "createdAt": "2024-01-01",
       "isAdmin": false
     },
-    "MOONX": {
-      "id": "MOONX",
-      "name": "MoonX",
+    "시바": {
+      "id": "시바",
+      "name": "시바 코인",
       "type": "coin",
       "sector": "밈코인",
       "emoji": "🌙",
@@ -128,9 +128,9 @@
       "createdAt": "2024-01-01",
       "isAdmin": false
     },
-    "DATALINK": {
-      "id": "DATALINK",
-      "name": "DataLink Protocol",
+    "네모바지스폰지밥": {
+      "id": "네모바지스폰지밥",
+      "name": "네모바지스폰지밥 코인",
       "type": "coin",
       "sector": "오라클",
       "emoji": "🔗",
@@ -146,9 +146,9 @@
       "createdAt": "2024-01-01",
       "isAdmin": false
     },
-    "METAVRS": {
-      "id": "METAVRS",
-      "name": "MetaVerse Token",
+    "메타버스": {
+      "id": "메타버스",
+      "name": "메타버스 토큰",
       "type": "coin",
       "sector": "메타버스",
       "emoji": "🌐",
