@@ -28,7 +28,7 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 (async () => {
   console.log(`🔄 ${commands.length}개 슬래시 커맨드 등록 중...`);
   const data = await rest.put(
-    Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+    Routes.applicationCommands(process.env.CLIENT_ID),
     { body: commands }
   );
   console.log(`✅ ${data.length}개 커맨드 등록 완료!`);
