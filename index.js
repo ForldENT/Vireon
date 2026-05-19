@@ -7,6 +7,7 @@ const { buyAsset, sellAsset } = require('./utils/marketManager');
 const { marketOverviewEmbed, rankingEmbed, C } = require('./utils/stockEmbeds');
 const { loadMarket, getRankings } = require('./utils/marketManager');
 const { marketControlRow } = require('./utils/stockEmbeds');
+const { initPlayer, skipMusic, stopMusic, getMusicState } = require('./utils/musicPlayer');
 
 // ── 클라이언트 초기화 ─────────────────────────────────
 const client = new Client({
@@ -28,12 +29,10 @@ function loadCommandsFrom(dir) {
       loadCommandsFrom(fullPath);
     } else if (entry.name.endsWith('.js')) {
       const mod = require(fullPath);
-      // 단일 커맨드
       if (mod.data && mod.execute) {
         client.commands.set(mod.data.name, mod);
         console.log(`✅ 커맨드 로드: /${mod.data.name}`);
       }
-      // 복수 커맨드 (buyCommand, sellCommand 등)
       for (const key of Object.keys(mod)) {
         if (mod[key]?.data && mod[key]?.execute) {
           client.commands.set(mod[key].data.name, mod[key]);
@@ -48,10 +47,13 @@ loadCommandsFrom(path.join(__dirname, 'commands'));
 
 // ── 봇 준비 ───────────────────────────────────────────
 client.once(Events.ClientReady, async (c) => {
-  console.log(`\n📊 ${c.user.tag} 가상 주식 봇 시작!`);
+  console.log(`\n📊 ${c.user.tag} 봇 시작!`);
   console.log(`📋 ${client.commands.size}개 커맨드 로드\n`);
 
-  c.user.setActivity('📈 /stock market', { type: 3 }); // Watching
+  c.user.setActivity('📈 /stock market', { type: 3 });
+
+  // discord-player 초기화
+  await initPlayer(c);
 
   // 스케줄러 시작
   setClient(c);
@@ -60,8 +62,6 @@ client.once(Events.ClientReady, async (c) => {
 
 // ── 슬래시 커맨드 처리 ────────────────────────────────
 client.on(Events.InteractionCreate, async (interaction) => {
-
-  // 🎮 버튼 처리
   if (interaction.isButton()) {
     await handleButton(interaction);
     return;
@@ -146,10 +146,7 @@ async function handleButton(interaction) {
     await interaction.deferUpdate();
     const result = buyAsset(interaction.user.id, ticker, qty);
     return interaction.editReply({
-      embeds: [new EmbedBuilder()
-        .setColor(result.success ? C.bull : C.bear)
-        .setDescription(result.message)
-      ],
+      embeds: [new EmbedBuilder().setColor(result.success ? C.bull : C.bear).setDescription(result.message)],
       components: [],
     });
   }
@@ -186,60 +183,43 @@ async function handleButton(interaction) {
     });
   }
 
-  // ── index.js 버튼 핸들러에 추가할 코드 ───────────────
-// 기존 handleButton 함수 안에 아래 코드를 추가하세요!
-
-/*
-  music_skip 버튼
-  music_stop 버튼
-  music_queue 버튼
-*/
-
-// ========== 아래 코드를 index.js의 handleButton 함수 안에 붙여넣으세요 ==========
-
   // 🎵 음악 스킵
   if (id === 'music_skip') {
-    const { skipTrack, getMusicPlayerState } = require('./utils/musicPlayer');
-    const player = getMusicPlayerState(interaction.guildId);
-    if (!player?.isPlaying) {
+    const state = getMusicState(interaction.guildId);
+    if (!state?.isPlaying) {
       return interaction.reply({ embeds: [new EmbedBuilder().setColor(0xFF4757).setDescription('❌ 재생 중인 곡이 없어요!')], ephemeral: true });
     }
-    const skipped = player.currentTrack?.title || '알 수 없는 곡';
-    skipTrack(interaction.guildId);
-    return interaction.reply({ embeds: [new EmbedBuilder().setColor(0x57F287).setDescription(`⏭️ **${skipped}** 스킵!`)], ephemeral: true });
+    const title = state.currentTrack?.title || '알 수 없는 곡';
+    skipMusic(interaction.guildId);
+    return interaction.reply({ embeds: [new EmbedBuilder().setColor(0x57F287).setDescription(`⏭️ **${title}** 스킵!`)], ephemeral: true });
   }
 
   // 🎵 음악 정지
   if (id === 'music_stop') {
-    const { stopAndLeave, getMusicPlayerState } = require('./utils/musicPlayer');
-    const player = getMusicPlayerState(interaction.guildId);
-    if (!player?.isPlaying) {
+    const state = getMusicState(interaction.guildId);
+    if (!state?.isPlaying) {
       return interaction.reply({ embeds: [new EmbedBuilder().setColor(0xFF4757).setDescription('❌ 재생 중인 곡이 없어요!')], ephemeral: true });
     }
-    stopAndLeave(interaction.guildId);
+    stopMusic(interaction.guildId);
     return interaction.reply({ embeds: [new EmbedBuilder().setColor(0x5865F2).setDescription('⏹️ 재생을 중지했어요!')], ephemeral: true });
   }
 
   // 🎵 대기열 보기
   if (id === 'music_queue') {
-    const { getMusicPlayerState } = require('./utils/musicPlayer');
-    const player = getMusicPlayerState(interaction.guildId);
-    if (!player?.currentTrack) {
+    const state = getMusicState(interaction.guildId);
+    if (!state?.currentTrack) {
       return interaction.reply({ embeds: [new EmbedBuilder().setColor(0xFF4757).setDescription('❌ 재생 중인 곡이 없어요!')], ephemeral: true });
     }
-    const trackList = player.queue.slice(0, 10).map((t, i) => `\`${i + 1}.\` **${t.title}**`).join('\n') || '대기열이 비어있어요';
+    const trackList = state.tracks.slice(0, 10).map((t, i) => `\`${i + 1}.\` **${t.title}**`).join('\n') || '대기열이 비어있어요';
     return interaction.reply({
       embeds: [new EmbedBuilder().setColor(0x5865F2).setTitle('📋 대기열')
         .addFields(
-          { name: '🎵 현재 재생', value: `**${player.currentTrack.title}**` },
-          { name: `📃 대기열 (${player.queue.length}곡)`, value: trackList }
+          { name: '🎵 현재 재생', value: `**${state.currentTrack.title}**` },
+          { name: `📃 대기열 (${state.tracks.length}곡)`, value: trackList }
         )],
       ephemeral: true
     });
   }
-
-// ========== 여기까지 ==========
-
 }
 
 process.on('unhandledRejection', err => console.error('Unhandled:', err));
