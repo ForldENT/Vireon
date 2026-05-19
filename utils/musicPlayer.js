@@ -6,8 +6,10 @@ const {
   VoiceConnectionStatus,
   entersState,
   NoSubscriberBehavior,
+  StreamType,
 } = require('@discordjs/voice');
-const playdl = require('play-dl');
+const ytdl = require('@distube/ytdl-core');
+const yts = require('yt-search');
 
 // 서버별 플레이어 상태
 const players = new Map();
@@ -108,38 +110,42 @@ async function connectToVoiceChannel(voiceChannel, guildId) {
   }
 }
 
+// 트랙 정보 가져오기
 async function getTrackInfo(query) {
   try {
     let url = query;
 
+    // URL이 아니면 검색
     if (!query.startsWith('http')) {
-      const results = await playdl.search(query, { source: { youtube: 'video' }, limit: 1 });
-      if (results.length === 0) throw new Error('검색 결과가 없어요.');
-      url = results[0].url;
+      const result = await yts(query);
+      if (!result.videos.length) throw new Error('검색 결과가 없어요.');
+      url = result.videos[0].url;
     }
 
-    const urlType = playdl.yt_validate(url);
-    if (!urlType || urlType === 'search') throw new Error('올바른 YouTube URL이 아니에요.');
+    // URL 유효성 확인
+    if (!ytdl.validateURL(url)) throw new Error('올바른 YouTube URL이 아니에요.');
 
-    const info = await playdl.video_info(url);
-    const video = info.video_details;
+    const info = await ytdl.getInfo(url);
+    const video = info.videoDetails;
 
-    const duration = video.durationInSec
-      ? `${Math.floor(video.durationInSec / 60)}:${String(video.durationInSec % 60).padStart(2, '0')}`
+    const durationInSec = parseInt(video.lengthSeconds) || 0;
+    const duration = durationInSec
+      ? `${Math.floor(durationInSec / 60)}:${String(durationInSec % 60).padStart(2, '0')}`
       : '알 수 없음';
 
     return {
       title: video.title || '제목 없음',
-      url: video.url,
+      url: video.video_url,
       duration,
       thumbnail: video.thumbnails?.[0]?.url || null,
-      durationInSec: video.durationInSec || 0,
+      durationInSec,
     };
   } catch (error) {
     throw new Error(`트랙 정보를 가져올 수 없어요: ${error.message}`);
   }
 }
 
+// 다음 트랙 재생
 async function playNextTrack(guildId) {
   const player = players.get(guildId);
   if (!player || player.queue.length === 0) return;
@@ -149,8 +155,16 @@ async function playNextTrack(guildId) {
   player.isPlaying = true;
 
   try {
-    const stream = await playdl.stream(track.url, { quality: 2 });
-    const resource = createAudioResource(stream.stream, { inputType: stream.type });
+    const stream = ytdl(track.url, {
+      filter: 'audioonly',
+      quality: 'highestaudio',
+      highWaterMark: 1 << 25,
+    });
+
+    const resource = createAudioResource(stream, {
+      inputType: StreamType.Arbitrary,
+    });
+
     player.audioPlayer.play(resource);
 
     if (player.textChannel) {
