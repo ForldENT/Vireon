@@ -1,9 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const {
   createAsset, deleteAsset, forceSetPrice,
-  loadConfig, saveConfig, applyDailyUpdate,
+  loadConfig, saveConfig,
 } = require('../../utils/marketManager');
-const { generateDailyNews } = require('../../utils/newsGenerator');
 const { runDailyMarketUpdate } = require('../../scheduler/marketScheduler');
 const { adminCreateEmbed, C } = require('../../utils/stockEmbeds');
 
@@ -17,16 +16,18 @@ module.exports = {
     .addSubcommand(sub => sub
       .setName('create')
       .setDescription('새 주식/코인 종목을 생성합니다')
-      .addStringOption(o => o.setName('ticker').setDescription('티커 (예: APPLE, MYTOKEN)').setRequired(true))
+      .addStringOption(o => o.setName('ticker').setDescription('티커 (예: APPLE)').setRequired(true))
       .addStringOption(o => o.setName('name').setDescription('회사/코인 이름').setRequired(true))
       .addStringOption(o => o.setName('type').setDescription('타입').setRequired(true).addChoices(
-        { name: '🏢 주식 (Stock)', value: 'stock' },
-        { name: '🪙 코인 (Coin)', value: 'coin' },
+        { name: '🇰🇷 국내주식', value: 'domestic' },
+        { name: '🌍 해외주식', value: 'foreign' },
+        { name: '🚀 우주주식', value: 'space' },
+        { name: '🪙 코인', value: 'coin' },
       ))
-      .addStringOption(o => o.setName('sector').setDescription('섹터 (예: 기술, IT, 게임, DeFi)').setRequired(true))
+      .addStringOption(o => o.setName('sector').setDescription('섹터 (예: 기술, IT, 게임)').setRequired(true))
       .addIntegerOption(o => o.setName('price').setDescription('초기 가격 (원)').setRequired(true).setMinValue(1))
-      .addStringOption(o => o.setName('description').setDescription('회사/코인 설명').setRequired(true))
-      .addStringOption(o => o.setName('emoji').setDescription('이모지 (기본: 🏢/🪙)').setRequired(false))
+      .addStringOption(o => o.setName('description').setDescription('설명').setRequired(true))
+      .addStringOption(o => o.setName('emoji').setDescription('이모지').setRequired(false))
     )
 
     // 종목 삭제
@@ -36,18 +37,18 @@ module.exports = {
       .addStringOption(o => o.setName('ticker').setDescription('티커').setRequired(true))
     )
 
-    // 강제 가격 설정
+    // 가격 설정
     .addSubcommand(sub => sub
       .setName('setprice')
       .setDescription('종목 가격을 강제 설정합니다')
       .addStringOption(o => o.setName('ticker').setDescription('티커').setRequired(true))
-      .addIntegerOption(o => o.setName('price').setDescription('새 가격 (원)').setRequired(true).setMinValue(1))
+      .addIntegerOption(o => o.setName('price').setDescription('새 가격').setRequired(true).setMinValue(1))
     )
 
-    // 수동 시장 업데이트
+    // 수동 업데이트
     .addSubcommand(sub => sub
       .setName('update')
-      .setDescription('수동으로 시장 가격을 업데이트합니다 (뉴스 포함)')
+      .setDescription('수동으로 시장을 업데이트합니다 (뉴스 포함)')
     )
 
     // 채널 설정
@@ -61,16 +62,15 @@ module.exports = {
       .addChannelOption(o => o.setName('channel').setDescription('채널 선택').setRequired(true))
     )
 
-    // 시드머니 조정
+    // 잔액 설정
     .addSubcommand(sub => sub
       .setName('setbalance')
-      .setDescription('특정 유저의 잔액을 설정합니다')
+      .setDescription('유저 잔액을 설정합니다')
       .addUserOption(o => o.setName('user').setDescription('대상 유저').setRequired(true))
       .addIntegerOption(o => o.setName('amount').setDescription('설정할 금액').setRequired(true).setMinValue(0))
     ),
 
   async execute(interaction) {
-    // 관리자 권한 확인
     if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
       return interaction.reply({
         embeds: [new EmbedBuilder().setColor(C.bear).setDescription('❌ 관리자 권한이 필요해요.')],
@@ -82,14 +82,18 @@ module.exports = {
 
     // ── 종목 생성 ─────────────────────────────────────
     if (sub === 'create') {
+      const typeValue = interaction.options.getString('type');
+      const isCoin = typeValue === 'coin';
+
       const options = {
         ticker: interaction.options.getString('ticker').toUpperCase(),
         name: interaction.options.getString('name'),
-        type: interaction.options.getString('type'),
+        type: isCoin ? 'coin' : 'stock',
+        category: isCoin ? 'crypto' : typeValue,
         sector: interaction.options.getString('sector'),
         price: interaction.options.getInteger('price'),
         description: interaction.options.getString('description'),
-        emoji: interaction.options.getString('emoji') || null,
+        emoji: interaction.options.getString('emoji') || (isCoin ? '🪙' : '🏢'),
       };
 
       const result = createAsset(options);
@@ -100,9 +104,27 @@ module.exports = {
         });
       }
 
+      const categoryLabel = {
+        domestic: '🇰🇷 국내주식',
+        foreign: '🌍 해외주식',
+        space: '🚀 우주주식',
+        crypto: '🪙 코인',
+      }[options.category] || options.category;
+
       return interaction.reply({
-        embeds: [adminCreateEmbed(options)
-          .setDescription(`✅ 종목이 성공적으로 생성되었습니다!\n\n> 투자자들이 \`/stock info ${options.ticker}\`로 확인할 수 있습니다.`)
+        embeds: [new EmbedBuilder()
+          .setColor(C.admin)
+          .setTitle('🔧 신규 종목 생성 완료!')
+          .addFields(
+            { name: '티커', value: `\`${options.ticker}\``, inline: true },
+            { name: '이름', value: options.name, inline: true },
+            { name: '카테고리', value: categoryLabel, inline: true },
+            { name: '섹터', value: options.sector, inline: true },
+            { name: '이모지', value: options.emoji, inline: true },
+            { name: '초기가', value: `${options.price.toLocaleString()}원`, inline: true },
+            { name: '설명', value: options.description },
+          )
+          .setTimestamp()
         ],
       });
     }
@@ -120,7 +142,7 @@ module.exports = {
       });
     }
 
-    // ── 강제 가격 설정 ────────────────────────────────
+    // ── 가격 설정 ─────────────────────────────────────
     if (sub === 'setprice') {
       const ticker = interaction.options.getString('ticker').toUpperCase();
       const price = interaction.options.getInteger('price');
@@ -129,14 +151,14 @@ module.exports = {
         embeds: [new EmbedBuilder()
           .setColor(result.success ? C.admin : C.bear)
           .setDescription(result.success
-            ? `🔧 **${ticker}** 가격을 **${price.toLocaleString()}원**으로 강제 설정했어요.`
+            ? `🔧 **${ticker}** 가격을 **${price.toLocaleString()}원**으로 설정했어요.`
             : `❌ ${result.message}`)
         ],
         ephemeral: true,
       });
     }
 
-    // ── 수동 시장 업데이트 ────────────────────────────
+    // ── 수동 업데이트 ─────────────────────────────────
     if (sub === 'update') {
       await interaction.deferReply();
       try {
@@ -161,11 +183,9 @@ module.exports = {
       const type = interaction.options.getString('type');
       const channel = interaction.options.getChannel('channel');
       const config = loadConfig();
-
       if (type === 'news') config.newsChannelId = channel.id;
       else if (type === 'stock') config.stockChannelId = channel.id;
       saveConfig(config);
-
       return interaction.reply({
         embeds: [new EmbedBuilder()
           .setColor(C.admin)
