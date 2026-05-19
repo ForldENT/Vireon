@@ -215,6 +215,105 @@ function generateDailyNews() {
     }
   }
 
+  // ── 가짜 뉴스 (2% 확률) ────────────────────────────
+  // 긍정적으로 보이지만 다음 날 하락장을 유발하는 뉴스
+  if (Math.random() < 0.02) {
+    const fakeTickers = [...tickers].sort(() => Math.random() - 0.5).slice(0, 1);
+    const fakeTicker = fakeTickers[0];
+    const fakeAsset = assets[fakeTicker];
+
+    const FAKE_NEWS_TEMPLATES = [
+      {
+        title: `[단독] ${fakeAsset?.name}, 대형 글로벌 기업과 비밀 인수합병 협상 중`,
+        body: `업계 소식통에 따르면 ${fakeAsset?.name}이(가) 글로벌 대형 기업과 수조원 규모의 인수합병 협상을 극비리에 진행 중인 것으로 알려졌다. 협상이 성사될 경우 주가에 큰 호재가 될 전망이다.`,
+      },
+      {
+        title: `${fakeAsset?.name}, 차세대 혁신 기술 개발 완료...내일 공식 발표 예정`,
+        body: `${fakeAsset?.name} 내부 관계자에 따르면 업계 판도를 뒤바꿀 혁신 기술 개발이 완료되어 내일 공식 발표를 앞두고 있다고 전해졌다. 시장 전문가들은 주가 급등을 예상하고 있다.`,
+      },
+      {
+        title: `[긴급] ${fakeAsset?.name} 정부 대규모 지원 사업 최종 선정`,
+        body: `정부가 추진하는 대규모 국책 사업의 최종 수행 기관으로 ${fakeAsset?.name}이(가) 선정된 것으로 알려졌다. 수천억원 규모의 지원금이 지급될 예정이다.`,
+      },
+      {
+        title: `${fakeAsset?.name}, 해외 유명 투자사 대규모 지분 매입 포착`,
+        body: `글로벌 헤지펀드가 ${fakeAsset?.name}의 지분을 대량 매입하고 있는 정황이 포착됐다. 스마트머니의 집중 매수는 향후 주가 상승의 강력한 신호라는 분석이다.`,
+      },
+    ];
+
+    const fakeTemplate = FAKE_NEWS_TEMPLATES[Math.floor(Math.random() * FAKE_NEWS_TEMPLATES.length)];
+
+    // 가짜 뉴스: 오늘은 긍정적으로 보이지만 실제 impact는 다음 업데이트 때 하락
+    // 오늘 impact는 소폭 상승처럼 보이게 (+0.05~0.1)
+    // 내일 영향을 위해 pendingFakeImpact 저장
+    const fakeImpactToday = +(Math.random() * 0.05 + 0.03).toFixed(2);
+
+    // 다음 업데이트에 반영될 하락 예약 저장
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const fakePendingFile = path.join(__dirname, '../data/fake_pending.json');
+      const existing_fake = fs.existsSync(fakePendingFile)
+        ? JSON.parse(fs.readFileSync(fakePendingFile, 'utf8'))
+        : [];
+      existing_fake.push({
+        ticker: fakeTicker,
+        impact: -(Math.random() * 0.15 + 0.10), // 다음 업데이트 때 -10~25% 하락
+        scheduledAt: new Date().toISOString(),
+      });
+      fs.writeFileSync(fakePendingFile, JSON.stringify(existing_fake, null, 2));
+    } catch (e) {
+      console.error('가짜 뉴스 예약 저장 오류:', e.message);
+    }
+
+    newsImpacts[fakeTicker] = (newsImpacts[fakeTicker] || 0) + fakeImpactToday;
+
+    generatedNews.push({
+      id: Date.now() + 7777,
+      ticker: fakeTicker,
+      assetName: fakeAsset?.name || fakeTicker,
+      assetEmoji: fakeAsset?.emoji || '📰',
+      type: 'fake',
+      title: `📰 ${fakeTemplate.title}`,
+      body: `${fakeTemplate.body}\n\n⚠️ *본 뉴스는 미확인 소식통 기반이며 투자에 참고만 하시기 바랍니다.*`,
+      impact: fakeImpactToday,
+      isPositive: true,
+      isFake: true,
+      publishedAt: new Date().toISOString(),
+    });
+  }
+
+  // ── 가짜 뉴스 하락 반영 ──────────────────────────────
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const fakePendingFile = path.join(__dirname, '../data/fake_pending.json');
+    if (fs.existsSync(fakePendingFile)) {
+      const pendingFakes = JSON.parse(fs.readFileSync(fakePendingFile, 'utf8'));
+      const now = new Date();
+      const toApply = [];
+      const remaining = [];
+
+      for (const item of pendingFakes) {
+        const scheduled = new Date(item.scheduledAt);
+        const hoursDiff = (now - scheduled) / (1000 * 60 * 60);
+        if (hoursDiff >= 1) {
+          toApply.push(item);
+        } else {
+          remaining.push(item);
+        }
+      }
+
+      for (const item of toApply) {
+        newsImpacts[item.ticker] = (newsImpacts[item.ticker] || 0) + item.impact;
+      }
+
+      fs.writeFileSync(fakePendingFile, JSON.stringify(remaining, null, 2));
+    }
+  } catch (e) {
+    console.error('가짜 뉴스 하락 반영 오류:', e.message);
+  }
+
   // 뉴스 저장 (최근 100개 유지)
   const existing = loadNews();
   const updated = [...generatedNews, ...existing].slice(0, 100);

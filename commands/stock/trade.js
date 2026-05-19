@@ -12,7 +12,7 @@ const buyCommand = {
     .addBooleanOption(o => o.setName('confirm').setDescription('확인 없이 바로 매수').setRequired(false)),
 
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply();
 
     const ticker = interaction.options.getString('ticker').toUpperCase();
     const qty = interaction.options.getInteger('qty');
@@ -28,7 +28,6 @@ const buyCommand = {
     const user = ensureUser(interaction.user.id);
     const totalCost = asset.price * qty;
 
-    // 잔액 부족 선체크
     if (user.balance < totalCost) {
       return interaction.editReply({
         embeds: [new EmbedBuilder()
@@ -43,7 +42,6 @@ const buyCommand = {
       });
     }
 
-    // 확인 없이 바로 매수
     if (skipConfirm) {
       const result = buyAsset(interaction.user.id, ticker, qty);
       return interaction.editReply({
@@ -54,7 +52,6 @@ const buyCommand = {
       });
     }
 
-    // 확인 메시지
     const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
     const confirmRow = new ActionRowBuilder().addComponents(
       new ButtonBuilder().setCustomId(`buy_confirm_${ticker}_${qty}`).setLabel(`✅ ${qty.toLocaleString()}주 매수 확정`).setStyle(ButtonStyle.Success),
@@ -64,7 +61,7 @@ const buyCommand = {
     await interaction.editReply({
       embeds: [new EmbedBuilder()
         .setColor(C.stock)
-        .setTitle(`🟦 매수 확인`)
+        .setTitle('🟦 매수 확인')
         .setDescription(`**${asset.emoji} ${asset.name} (${ticker})**`)
         .addFields(
           { name: '💰 현재가', value: formatPrice(asset.price), inline: true },
@@ -88,7 +85,7 @@ const sellCommand = {
     .addBooleanOption(o => o.setName('confirm').setDescription('확인 없이 바로 매도').setRequired(false)),
 
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply();
 
     const ticker = interaction.options.getString('ticker').toUpperCase();
     let qty = interaction.options.getInteger('qty');
@@ -110,7 +107,6 @@ const sellCommand = {
       });
     }
 
-    // 전량 매도
     if (qty === 0) qty = pos.qty;
 
     if (qty > pos.qty) {
@@ -138,7 +134,6 @@ const sellCommand = {
       });
     }
 
-    // 확인 메시지
     const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
     const confirmRow = new ActionRowBuilder().addComponents(
       new ButtonBuilder().setCustomId(`sell_confirm_${ticker}_${qty}`).setLabel(`✅ ${qty.toLocaleString()}주 매도 확정`).setStyle(ButtonStyle.Danger),
