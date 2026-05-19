@@ -3,7 +3,7 @@ const {
   createAsset, deleteAsset, forceSetPrice,
   loadConfig, saveConfig,
 } = require('../../utils/marketManager');
-const { runDailyMarketUpdate } = require('../../scheduler/marketScheduler');
+const { runDailyMarketUpdate, runHourlyTasks } = require('../../scheduler/marketScheduler');
 const { adminCreateEmbed, C } = require('../../utils/stockEmbeds');
 
 module.exports = {
@@ -162,17 +162,17 @@ module.exports = {
     if (sub === 'update') {
       await interaction.deferReply();
       try {
-        const result = await runDailyMarketUpdate();
+        const result = await runHourlyTasks();
         const count = result?.results?.length || 0;
         const newsCount = result?.news?.length || 0;
-        return interaction.editReply({
-          embeds: [new EmbedBuilder()
-            .setColor(C.admin)
-            .setTitle('🔧 수동 시장 업데이트 완료')
-            .setDescription(`📊 **${count}**개 종목 가격 업데이트\n📰 **${newsCount}**건의 뉴스 생성`)
-            .setTimestamp()
-          ],
-        });
+return interaction.editReply({
+  embeds: [new EmbedBuilder()
+    .setColor(C.admin)
+    .setTitle('🔧 수동 시장 업데이트 완료')
+    .setDescription(`📊 가격 업데이트 완료\n📰 뉴스 생성 완료`)
+    .setTimestamp()
+  ],
+});
       } catch (e) {
         return interaction.editReply({ content: `❌ 오류: ${e.message}` });
       }
