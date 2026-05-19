@@ -184,6 +184,61 @@ async function handleButton(interaction) {
       components: [],
     });
   }
+
+  // ── index.js 버튼 핸들러에 추가할 코드 ───────────────
+// 기존 handleButton 함수 안에 아래 코드를 추가하세요!
+
+/*
+  music_skip 버튼
+  music_stop 버튼
+  music_queue 버튼
+*/
+
+// ========== 아래 코드를 index.js의 handleButton 함수 안에 붙여넣으세요 ==========
+
+  // 🎵 음악 스킵
+  if (id === 'music_skip') {
+    const { skipTrack, getMusicPlayerState } = require('./utils/musicPlayer');
+    const player = getMusicPlayerState(interaction.guildId);
+    if (!player?.isPlaying) {
+      return interaction.reply({ embeds: [new EmbedBuilder().setColor(0xFF4757).setDescription('❌ 재생 중인 곡이 없어요!')], ephemeral: true });
+    }
+    const skipped = player.currentTrack?.title || '알 수 없는 곡';
+    skipTrack(interaction.guildId);
+    return interaction.reply({ embeds: [new EmbedBuilder().setColor(0x57F287).setDescription(`⏭️ **${skipped}** 스킵!`)], ephemeral: true });
+  }
+
+  // 🎵 음악 정지
+  if (id === 'music_stop') {
+    const { stopAndLeave, getMusicPlayerState } = require('./utils/musicPlayer');
+    const player = getMusicPlayerState(interaction.guildId);
+    if (!player?.isPlaying) {
+      return interaction.reply({ embeds: [new EmbedBuilder().setColor(0xFF4757).setDescription('❌ 재생 중인 곡이 없어요!')], ephemeral: true });
+    }
+    stopAndLeave(interaction.guildId);
+    return interaction.reply({ embeds: [new EmbedBuilder().setColor(0x5865F2).setDescription('⏹️ 재생을 중지했어요!')], ephemeral: true });
+  }
+
+  // 🎵 대기열 보기
+  if (id === 'music_queue') {
+    const { getMusicPlayerState } = require('./utils/musicPlayer');
+    const player = getMusicPlayerState(interaction.guildId);
+    if (!player?.currentTrack) {
+      return interaction.reply({ embeds: [new EmbedBuilder().setColor(0xFF4757).setDescription('❌ 재생 중인 곡이 없어요!')], ephemeral: true });
+    }
+    const trackList = player.queue.slice(0, 10).map((t, i) => `\`${i + 1}.\` **${t.title}**`).join('\n') || '대기열이 비어있어요';
+    return interaction.reply({
+      embeds: [new EmbedBuilder().setColor(0x5865F2).setTitle('📋 대기열')
+        .addFields(
+          { name: '🎵 현재 재생', value: `**${player.currentTrack.title}**` },
+          { name: `📃 대기열 (${player.queue.length}곡)`, value: trackList }
+        )],
+      ephemeral: true
+    });
+  }
+
+// ========== 여기까지 ==========
+
 }
 
 process.on('unhandledRejection', err => console.error('Unhandled:', err));
