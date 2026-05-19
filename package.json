@@ -10,11 +10,7 @@
   "dependencies": {
     "discord.js": "^14.14.1",
     "dotenv": "^16.4.5",
-    "node-cron": "^3.0.3",
-    "@discordjs/voice": "^0.17.0",
-    "opusscript": "^0.0.8",
-    "ffmpeg-static": "^5.2.0",
-    "play-dl": "^1.9.7"
+    "node-cron": "^3.0.3"
   },
   "engines": {
     "node": ">=20.0.0"
