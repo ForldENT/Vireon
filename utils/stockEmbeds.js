@@ -47,33 +47,40 @@ function marketOverviewEmbed(market) {
   const companies = Object.values(market.companies);
   const coins = Object.values(market.coins);
 
-  const stockLines = companies.map(a => {
-    const arr = priceArrow(a.changePercent);
-    const color = a.changePercent > 0 ? '🟢' : a.changePercent < 0 ? '🔴' : '⚪';
-    return `${color} \`${a.id.padEnd(8)}\` ${a.emoji} **${a.name}**\n> ${formatPrice(a.price)} ${arr} ${formatPct(a.changePercent)} | ${miniChart(a.history)}`;
-  }).join('\n');
+  // 카테고리별 분류
+  const domestic = companies.filter(a => !a.category || a.category === 'domestic');
+  const foreign = companies.filter(a => a.category === 'foreign');
+  const space = companies.filter(a => a.category === 'space');
 
-  const coinLines = coins.map(a => {
-    const arr = priceArrow(a.changePercent);
-    const color = a.changePercent > 0 ? '🟢' : a.changePercent < 0 ? '🔴' : '⚪';
-    return `${color} \`${a.id.padEnd(8)}\` ${a.emoji} **${a.name}**\n> ${formatPrice(a.price)} ${arr} ${formatPct(a.changePercent)} | ${miniChart(a.history)}`;
-  }).join('\n');
+  function makeLines(assets) {
+    if (assets.length === 0) return '없음';
+    return assets.map(a => {
+      const arr = a.changePercent > 0 ? '▲' : a.changePercent < 0 ? '▼' : '━';
+      const color = a.changePercent > 0 ? '🟢' : a.changePercent < 0 ? '🔴' : '⚪';
+      return `${color} \`${a.id.padEnd(7)}\` ${a.emoji} **${a.name}**\n> ${a.price.toLocaleString()}원 ${arr} ${(a.changePercent > 0 ? '+' : '')}${a.changePercent}%`;
+    }).join('\n');
+  }
 
   const lastUpdate = market.lastUpdate
     ? `<t:${Math.floor(new Date(market.lastUpdate).getTime() / 1000)}:R>`
     : '아직 업데이트 없음';
 
+  const fields = [];
+  if (domestic.length > 0) fields.push({ name: '🇰🇷 ─── 국내주식 ───────────────', value: makeLines(domestic) });
+  if (foreign.length > 0) fields.push({ name: '🌍 ─── 해외주식 ───────────────', value: makeLines(foreign) });
+  if (space.length > 0) fields.push({ name: '🚀 ─── 우주주식 ───────────────', value: makeLines(space) });
+  if (coins.length > 0) fields.push({ name: '🪙 ─── 코인 ──────────────────', value: makeLines(coins) });
+
+  const { EmbedBuilder } = require('discord.js');
   return new EmbedBuilder()
-    .setColor(C.info)
+    .setColor(0x2F3136)
     .setTitle('📊 가상 주식 시장 현황판')
     .setDescription(`> 🕐 마지막 업데이트: ${lastUpdate} | 거래일 **${market.totalTradingDays || 0}일차**`)
-    .addFields(
-      { name: '🏢 ─── 주식 ───────────────────', value: stockLines || '없음' },
-      { name: '🪙 ─── 코인 ───────────────────', value: coinLines || '없음' },
-    )
-    .setFooter({ text: '💡 /stock info [티커] 로 상세 정보 확인 | /buy [티커] [수량] 으로 매수' })
+    .addFields(...fields)
+    .setFooter({ text: '💡 /stock info [티커] 로 상세 정보 | /buy [티커] [수량] 으로 매수' })
     .setTimestamp();
 }
+
 
 // ── 종목 상세 Embed ───────────────────────────────────
 function assetDetailEmbed(asset) {

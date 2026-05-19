@@ -1,0 +1,102 @@
+{
+  "stockCategories": {
+    "domestic": {
+      "name": "국내주식",
+      "emoji": "🇰🇷",
+      "companies": [
+        { "name": "한국테크", "sector": "기술", "emoji": "💻" },
+        { "name": "서울에너지", "sector": "에너지", "emoji": "⚡" },
+        { "name": "코리아바이오", "sector": "바이오", "emoji": "🧬" },
+        { "name": "대한항공우주", "sector": "항공", "emoji": "✈️" },
+        { "name": "한강물산", "sector": "유통", "emoji": "🏪" },
+        { "name": "부산해운", "sector": "해운", "emoji": "🚢" },
+        { "name": "제주반도체", "sector": "반도체", "emoji": "🔬" },
+        { "name": "인천로보틱스", "sector": "로봇", "emoji": "🤖" },
+        { "name": "강남헬스케어", "sector": "의료", "emoji": "🏥" },
+        { "name": "경기자동차", "sector": "자동차", "emoji": "🚗" },
+        { "name": "울산화학", "sector": "화학", "emoji": "⚗️" },
+        { "name": "광주태양광", "sector": "신재생", "emoji": "☀️" },
+        { "name": "대전핀테크", "sector": "금융", "emoji": "💳" },
+        { "name": "세종AI", "sector": "AI", "emoji": "🧠" },
+        { "name": "수원게임즈", "sector": "게임", "emoji": "🎮" }
+      ]
+    },
+    "foreign": {
+      "name": "해외주식",
+      "emoji": "🌍",
+      "companies": [
+        { "name": "NovaTech Corp", "sector": "기술", "emoji": "💡" },
+        { "name": "GlobalAir Inc", "sector": "항공", "emoji": "🛫" },
+        { "name": "EuroPharm AG", "sector": "제약", "emoji": "💊" },
+        { "name": "AsiaTrade Ltd", "sector": "무역", "emoji": "📦" },
+        { "name": "CryptoBank NA", "sector": "금융", "emoji": "🏦" },
+        { "name": "OilMax Corp", "sector": "에너지", "emoji": "🛢️" },
+        { "name": "SkyNet AI", "sector": "AI", "emoji": "🤖" },
+        { "name": "FoodGiant Inc", "sector": "식품", "emoji": "🍔" },
+        { "name": "MediCure SA", "sector": "바이오", "emoji": "🔬" },
+        { "name": "AutoDrive GmbH", "sector": "자동차", "emoji": "🚙" },
+        { "name": "CloudBase Ltd", "sector": "클라우드", "emoji": "☁️" },
+        { "name": "GreenPower PLC", "sector": "신재생", "emoji": "🌱" },
+        { "name": "DataVault Inc", "sector": "보안", "emoji": "🔒" },
+        { "name": "RoboFactory AG", "sector": "로봇", "emoji": "⚙️" },
+        { "name": "SpaceMine Corp", "sector": "우주", "emoji": "🪐" }
+      ]
+    },
+    "space": {
+      "name": "우주주식",
+      "emoji": "🚀",
+      "companies": [
+        { "name": "스타마인 코퍼레이션", "sector": "우주채굴", "emoji": "⛏️" },
+        { "name": "갤럭시 에너지", "sector": "우주에너지", "emoji": "🌟" },
+        { "name": "오비탈 테크", "sector": "위성", "emoji": "🛸" },
+        { "name": "문베이스 Inc", "sector": "달기지", "emoji": "🌙" },
+        { "name": "마스 콜로니", "sector": "화성개발", "emoji": "🔴" },
+        { "name": "코스모스 AI", "sector": "우주AI", "emoji": "🧠" },
+        { "name": "네뷸라 바이오", "sector": "우주의학", "emoji": "💫" },
+        { "name": "아스테로이드 마이닝", "sector": "소행성", "emoji": "☄️" },
+        { "name": "딥스페이스 물류", "sector": "우주물류", "emoji": "📡" },
+        { "name": "솔라 다이나믹스", "sector": "태양에너지", "emoji": "☀️" },
+        { "name": "제로G 헬스케어", "sector": "무중력의학", "emoji": "🏥" },
+        { "name": "퀀텀 드라이브", "sector": "추진", "emoji": "⚡" }
+      ]
+    }
+  },
+  "coinPool": [
+    { "name": "NovaCoin", "emoji": "🔵", "sector": "레이어1" },
+    { "name": "StarToken", "emoji": "⭐", "sector": "DeFi" },
+    { "name": "MoonCash", "emoji": "🌕", "sector": "밈코인" },
+    { "name": "ZeroX", "emoji": "❌", "sector": "레이어2" },
+    { "name": "AquaNet", "emoji": "💧", "sector": "Web3" },
+    { "name": "PhoenixDAO", "emoji": "🔥", "sector": "거버넌스" },
+    { "name": "ShadowCoin", "emoji": "🌑", "sector": "프라이버시" },
+    { "name": "RocketFi", "emoji": "🚀", "sector": "DeFi" },
+    { "name": "CrystalToken", "emoji": "💎", "sector": "NFT" },
+    { "name": "ThunderChain", "emoji": "⚡", "sector": "레이어1" },
+    { "name": "PeachSwap", "emoji": "🍑", "sector": "DEX" },
+    { "name": "VortexDAO", "emoji": "🌀", "sector": "거버넌스" },
+    { "name": "NebulaCoin", "emoji": "🌌", "sector": "메타버스" },
+    { "name": "IronToken", "emoji": "⚙️", "sector": "인프라" },
+    { "name": "SakuraCoin", "emoji": "🌸", "sector": "밈코인" },
+    { "name": "AtomX", "emoji": "⚛️", "sector": "레이어1" },
+    { "name": "DawnToken", "emoji": "🌅", "sector": "Web3" },
+    { "name": "StealthNet", "emoji": "🥷", "sector": "프라이버시" },
+    { "name": "CosmosLink", "emoji": "🔗", "sector": "오라클" },
+    { "name": "GigaSwap", "emoji": "🔄", "sector": "DEX" }
+  ],
+  "bankruptcyReasons": [
+    "대규모 회계 부정 적발",
+    "핵심 경영진 횡령 사건",
+    "주력 제품 리콜 사태",
+    "경쟁사 대비 실적 급락",
+    "금융당국 영업정지 처분",
+    "대규모 소송 패소",
+    "주요 파트너사 계약 해지",
+    "시장 점유율 급감"
+  ],
+  "rugpullReasons": [
+    "개발팀 전원 잠적, 수백억 규모 먹튀 의혹",
+    "팀 지갑 전량 매도 후 소셜 계정 삭제",
+    "스마트컨트랙트 취약점 악용, 유동성 전액 탈취",
+    "익명 팀의 갑작스런 프로젝트 종료 선언"
+  ]
+}

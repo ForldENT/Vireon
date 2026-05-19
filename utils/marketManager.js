@@ -339,7 +339,7 @@ function getRankings(client) {
 
 // ── 관리자: 종목 생성 ─────────────────────────────────
 function createAsset(options) {
-  const { ticker, name, type, sector, emoji, price, description } = options;
+  const { ticker, name, type, sector, emoji, price, description, category } = options;
   const market = loadMarket();
   const section = type === 'coin' ? 'coins' : 'companies';
   const key = ticker.toUpperCase();
@@ -353,6 +353,7 @@ function createAsset(options) {
     name,
     type,
     sector,
+    category: category || (type === 'coin' ? 'crypto' : 'domestic'),
     emoji: emoji || (type === 'coin' ? '🪙' : '🏢'),
     price,
     open: price,
