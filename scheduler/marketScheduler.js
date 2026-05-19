@@ -91,18 +91,17 @@ async function runDailyMarketUpdate() {
 function startScheduler() {
   // 매일 오전 9시 (한국 시간 기준, UTC+9이면 00:00 UTC)
   // KST 09:00 = UTC 00:00
-  cron.schedule('0 0 * * *', () => {
-    console.log('⏰ [CRON] 일일 09:00 시장 업데이트 실행');
-    runDailyMarketUpdate();
-  }, { timezone: 'Asia/Seoul' });
+// KST 09:00 = UTC 00:00
+cron.schedule('0 0 * * *', () => {
+  runDailyMarketUpdate();
+});
 
-  // 매일 오후 6시 장 마감 요약 (선택)
-  cron.schedule('0 18 * * *', () => {
-    console.log('⏰ [CRON] 장 마감 알림');
-    sendClosingBell();
-  }, { timezone: 'Asia/Seoul' });
-
-  console.log('⏰ [스케줄러] 등록 완료 (매일 09:00 시장 업데이트 / 18:00 마감 알림)');
+// KST 16:00 = UTC 07:00
+cron.schedule('0 7 * * *', () => {
+  console.log('⏰ [CRON] 장 마감 알림');
+  sendClosingBell();
+});
+  console.log('⏰ [스케줄러] 등록 완료 (매일 09:00 시장 업데이트 / 16:00 마감 알림)');
 }
 
 async function sendClosingBell() {
@@ -118,7 +117,7 @@ async function sendClosingBell() {
     embeds: [new EmbedBuilder()
       .setColor(0xFF6B35)
       .setTitle('🔔 장 마감 알림')
-      .setDescription('오늘 가상 시장의 거래가 마감되었습니다.\n내일 오전 9시에 새로운 뉴스와 함께 시장이 열립니다!')
+      .setDescription('오늘 가상 시장의 거래가 마감되었습니다.\n내일 오전 9시에 새로운 뉴스와 함께 시장이 열립니다!\n\n> 🕐 거래 시간: 오전 9시 ~ 오후 4시')
       .setTimestamp()
     ]
   });
