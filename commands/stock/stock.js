@@ -1,11 +1,10 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { getAllAssets, getAsset, getPortfolio, getRankings, ensureUser, loadConfig } = require('../utils/marketManager');
-const { getRecentNews, getNewsByTicker } = require('../utils/newsGenerator');
+const { getAllAssets, getAsset, getPortfolio, getRankings, ensureUser, loadConfig, loadMarket } = require('../../utils/marketManager');
+const { getRecentNews, getNewsByTicker } = require('../../utils/newsGenerator');
 const {
   marketOverviewEmbed, assetDetailEmbed, portfolioEmbed,
   transactionEmbed, rankingEmbed, newsEmbed, singleNewsEmbed, marketControlRow,
-} = require('../utils/stockEmbeds');
-const { loadMarket } = require('../utils/marketManager');
+} = require('../../utils/stockEmbeds');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -39,11 +38,12 @@ module.exports = {
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
 
-    // ── 투자 시작 ─────────────────────────────────────
+    // ── 투자 시작 ────────────────────────────────────
     if (sub === 'start') {
       const user = ensureUser(interaction.user.id);
       const config = loadConfig();
       const { EmbedBuilder } = require('discord.js');
+
       return interaction.reply({
         embeds: [new EmbedBuilder()
           .setColor(0x00D26A)
@@ -55,6 +55,7 @@ module.exports = {
           )
           .setTimestamp()
         ],
+        ephemeral: true,
       });
     }
 
@@ -105,9 +106,8 @@ module.exports = {
 
     // ── 거래 내역 ─────────────────────────────────────
     if (sub === 'history') {
-      await interaction.deferReply();
       const portfolio = getPortfolio(interaction.user.id);
-      return interaction.editReply({ embeds: [transactionEmbed(portfolio.transactions)] });
+      return interaction.reply({ embeds: [transactionEmbed(portfolio.transactions)] });
     }
 
     // ── 랭킹 ─────────────────────────────────────────
@@ -123,13 +123,13 @@ module.exports = {
       if (ticker) {
         const news = getNewsByTicker(ticker);
         if (!news.length) {
-          return interaction.reply({ content: `📰 **${ticker.toUpperCase()}** 관련 뉴스가 없어요.` });
+          return interaction.reply({ content: `📰 **${ticker.toUpperCase()}** 관련 뉴스가 없어요.`, ephemeral: true });
         }
         return interaction.reply({ embeds: news.slice(0, 3).map(n => singleNewsEmbed(n)) });
       }
       const recent = getRecentNews(5);
       if (!recent.length) {
-        return interaction.reply({ content: '📰 아직 뉴스가 없어요!' });
+        return interaction.reply({ content: '📰 아직 뉴스가 없어요. 내일 오전 9시에 업데이트됩니다!', ephemeral: true });
       }
       return interaction.reply({ embeds: [newsEmbed(recent)] });
     }
