@@ -10,7 +10,7 @@ const CONFIG_FILE = path.join(__dirname, '../data/config.json');
 function loadMarket() {
   if (!fs.existsSync(MARKET_FILE)) {
     fs.mkdirSync(path.dirname(MARKET_FILE), { recursive: true });
-    fs.writeFileSync(MARKET_FILE, '{"companies":{},"coins":{},"lastUpdate":null,"totalTradingDays":0}');
+    fs.writeFileSync(MARKET_FILE, JSON.stringify({"companies":{},"coins":{},"lastUpdate":null,"totalTradingDays":0}, null, 2));
   }
   return JSON.parse(fs.readFileSync(MARKET_FILE, 'utf8'));
 }
