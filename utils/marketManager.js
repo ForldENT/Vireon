@@ -14,6 +14,10 @@ function saveMarket(data) {
   fs.writeFileSync(MARKET_FILE, JSON.stringify(data, null, 2));
 }
 function loadUsers() {
+  if (!fs.existsSync(USERS_FILE)) {
+    fs.mkdirSync(path.dirname(USERS_FILE), { recursive: true });
+    fs.writeFileSync(USERS_FILE, '{}');
+  }
   return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
 }
 function saveUsers(data) {
@@ -30,6 +34,15 @@ function saveNews(data) {
   fs.writeFileSync(NEWS_FILE, JSON.stringify(data, null, 2));
 }
 function loadConfig() {
+  if (!fs.existsSync(CONFIG_FILE)) {
+    fs.mkdirSync(path.dirname(CONFIG_FILE), { recursive: true });
+    const defaultConfig = {
+      startingBalance: 10000000,
+      newsChannelId: null,
+      stockChannelId: null,
+    };
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify(defaultConfig, null, 2));
+  }
   return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
 }
 function saveConfig(data) {

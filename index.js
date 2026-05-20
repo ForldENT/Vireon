@@ -1,7 +1,6 @@
-require('dotenv').config();
-// index.js 맨 위 어딘가에 추가
 const http = require('http');
 http.createServer((req, res) => res.end('OK')).listen(process.env.PORT || 3000);
+require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const { Client, GatewayIntentBits, Collection, Events, EmbedBuilder } = require('discord.js');
