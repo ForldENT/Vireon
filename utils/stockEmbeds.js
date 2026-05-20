@@ -42,22 +42,39 @@ function miniChart(history) {
   return slice.map(v => bars[Math.floor(((v - min) / range) * 7)]).join('');
 }
 
-// ── 시장 현황 Embed ───────────────────────────────────
+// ── 시장 현황 Embed (국가별 분류 + 환율 표시) ─────────
 function marketOverviewEmbed(market) {
+  const { formatPriceWithKrw, getCurrencyByCategory, loadCurrency } = require('./currencyManager');
+  const currencyData = loadCurrency();
+
   const companies = Object.values(market.companies);
   const coins = Object.values(market.coins);
 
-  // 카테고리별 분류
   const domestic = companies.filter(a => !a.category || a.category === 'domestic');
-  const foreign = companies.filter(a => a.category === 'foreign');
+  const us = companies.filter(a => a.category === 'us');
+  const europe = companies.filter(a => a.category === 'europe');
+  const uk = companies.filter(a => a.category === 'uk');
+  const japan = companies.filter(a => a.category === 'japan');
+  const china = companies.filter(a => a.category === 'china');
   const space = companies.filter(a => a.category === 'space');
 
   function makeLines(assets) {
-    if (assets.length === 0) return '없음';
+    if (assets.length === 0) return null;
     return assets.map(a => {
-      const arr = a.changePercent > 0 ? '▲' : a.changePercent < 0 ? '▼' : '━';
+      const arr = priceArrow(a.changePercent);
       const color = a.changePercent > 0 ? '🟢' : a.changePercent < 0 ? '🔴' : '⚪';
-      return `${color} \`${a.id.padEnd(7)}\` ${a.emoji} **${a.name}**\n> ${a.price.toLocaleString()}원 ${arr} ${(a.changePercent > 0 ? '+' : '')}${a.changePercent}%`;
+      const currency = getCurrencyByCategory(a.category || 'domestic');
+      const priceStr = formatPriceWithKrw(a.price, currency);
+      return `${color} \`${a.id.padEnd(8)}\` ${a.emoji} **${a.name}**\n> ${priceStr} ${arr} ${formatPct(a.changePercent)} | ${miniChart(a.history)}`;
+    }).join('\n');
+  }
+
+  function makeCoinLines(assets) {
+    if (assets.length === 0) return null;
+    return assets.map(a => {
+      const arr = priceArrow(a.changePercent);
+      const color = a.changePercent > 0 ? '🟢' : a.changePercent < 0 ? '🔴' : '⚪';
+      return `${color} \`${a.id.padEnd(8)}\` ${a.emoji} **${a.name}**\n> ${formatPrice(a.price)} ${arr} ${formatPct(a.changePercent)} | ${miniChart(a.history)}`;
     }).join('\n');
   }
 
@@ -65,31 +82,46 @@ function marketOverviewEmbed(market) {
     ? `<t:${Math.floor(new Date(market.lastUpdate).getTime() / 1000)}:R>`
     : '아직 업데이트 없음';
 
-  const fields = [];
-  if (domestic.length > 0) fields.push({ name: '🇰🇷 ─── 국내주식 ───────────────', value: makeLines(domestic) });
-  if (foreign.length > 0) fields.push({ name: '🌍 ─── 해외주식 ───────────────', value: makeLines(foreign) });
-  if (space.length > 0) fields.push({ name: '🚀 ─── 우주주식 ───────────────', value: makeLines(space) });
-  if (coins.length > 0) fields.push({ name: '🪙 ─── 코인 ──────────────────', value: makeLines(coins) });
+  const krwRate = currencyData.rates['KRW']?.rate || 1350;
 
-  const { EmbedBuilder } = require('discord.js');
-  return new EmbedBuilder()
-    .setColor(0x2F3136)
+  const embed = new EmbedBuilder()
+    .setColor(C.info)
     .setTitle('📊 가상 주식 시장 현황판')
-    .setDescription(`> 🕐 마지막 업데이트: ${lastUpdate} | 거래일 **${market.totalTradingDays || 0}일차**`)
-    .addFields(...fields)
-    .setFooter({ text: '💡 /stock info [티커] 로 상세 정보 | /buy [티커] [수량] 으로 매수' })
+    .setDescription(`> 🕐 마지막 업데이트: ${lastUpdate} | 거래일 **${market.totalTradingDays || 0}일차**\n> 💱 환율: **1 USD = ${krwRate.toLocaleString()}원**`);
+
+  const sections = [
+    { data: domestic, label: '🇰🇷 ─── 국내주식 ───────────────', fn: makeLines },
+    { data: us, label: '🇺🇸 ─── 미국주식 (USD) ──────────', fn: makeLines },
+    { data: europe, label: '🇪🇺 ─── 유럽주식 (EUR) ──────────', fn: makeLines },
+    { data: uk, label: '🇬🇧 ─── 영국주식 (GBP) ──────────', fn: makeLines },
+    { data: japan, label: '🇯🇵 ─── 일본주식 (JPY) ──────────', fn: makeLines },
+    { data: china, label: '🇨🇳 ─── 중국주식 (CNY) ──────────', fn: makeLines },
+    { data: space, label: '🚀 ─── 우주주식 (USD) ──────────', fn: makeLines },
+    { data: coins, label: '🪙 ─── 코인 (KRW) ──────────────', fn: makeCoinLines },
+  ];
+
+  for (const s of sections) {
+    const lines = s.fn(s.data);
+    if (lines) embed.addFields({ name: s.label, value: lines });
+  }
+
+  embed.setFooter({ text: '💡 /stock info [티커] | /buy [티커] [수량] | /exchange rates 환율 확인' })
     .setTimestamp();
+
+  return embed;
 }
 
-
-// ── 종목 상세 Embed ───────────────────────────────────
+// ── 종목 상세 Embed (통화 표시) ───────────────────────
 function assetDetailEmbed(asset) {
+  const { formatPriceWithKrw, getCurrencyByCategory, getCountryInfo } = require('./currencyManager');
+  const currency = getCurrencyByCategory(asset.category || 'domestic');
+  const countryInfo = getCountryInfo(asset.category || 'domestic');
+
   const isUp = asset.changePercent > 0;
   const isDown = asset.changePercent < 0;
   const color = isUp ? C.bull : isDown ? C.bear : C.neutral;
   const arrow = priceArrow(asset.changePercent);
 
-  const chart = miniChart(asset.history);
   const chartFull = asset.history ? asset.history.slice(-20).map((v, i, arr) => {
     const prev = arr[i-1] || v;
     return v > prev ? '▲' : v < prev ? '▽' : '─';
@@ -100,14 +132,13 @@ function assetDetailEmbed(asset) {
     .setTitle(`${asset.emoji} ${asset.name} (${asset.id})`)
     .setDescription(`> ${asset.description}`)
     .addFields(
-      { name: '💰 현재가', value: `**${formatPrice(asset.price)}** ${arrow} ${formatPct(asset.changePercent)}`, inline: true },
-      { name: '📂 시작가', value: formatPrice(asset.open), inline: true },
+      { name: '💰 현재가', value: `**${formatPriceWithKrw(asset.price, currency)}** ${arrow} ${formatPct(asset.changePercent)}`, inline: true },
+      { name: '🌍 국가/통화', value: `${countryInfo.emoji} ${countryInfo.name} / ${currency}`, inline: true },
       { name: '🏷️ 섹터', value: `${asset.type === 'coin' ? '🪙 코인' : '🏢 주식'} / ${asset.sector}`, inline: true },
-      { name: '📈 고가', value: `**${formatPrice(asset.high)}**`, inline: true },
-      { name: '📉 저가', value: `**${formatPrice(asset.low)}**`, inline: true },
+      { name: '📈 고가', value: `**${formatPriceWithKrw(asset.high, currency)}**`, inline: true },
+      { name: '📉 저가', value: `**${formatPriceWithKrw(asset.low, currency)}**`, inline: true },
       { name: '📊 거래량', value: `${(asset.volume || 0).toLocaleString()}주`, inline: true },
       { name: `📉 가격 추이 (최근 ${Math.min(asset.history?.length || 0, 20)}일)`, value: `\`\`\`${chartFull}\`\`\`` },
-      { name: '🔢 히스토리 (숫자)', value: `\`${(asset.history || []).slice(-10).map(v => v.toLocaleString()).join(' → ')}\`` },
     )
     .setTimestamp();
 }

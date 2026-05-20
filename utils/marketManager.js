@@ -14,40 +14,18 @@ function saveMarket(data) {
   fs.writeFileSync(MARKET_FILE, JSON.stringify(data, null, 2));
 }
 function loadUsers() {
-  if (!fs.existsSync(USERS_FILE)) {
-    fs.mkdirSync(path.dirname(USERS_FILE), { recursive: true });
-    fs.writeFileSync(USERS_FILE, '{}');
-  }
   return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
 }
 function saveUsers(data) {
   fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2));
 }
 function loadNews() {
-  if (!fs.existsSync(NEWS_FILE)) {
-    fs.mkdirSync(path.dirname(NEWS_FILE), { recursive: true });
-    fs.writeFileSync(NEWS_FILE, '[]');
-  }
   return JSON.parse(fs.readFileSync(NEWS_FILE, 'utf8'));
 }
 function saveNews(data) {
   fs.writeFileSync(NEWS_FILE, JSON.stringify(data, null, 2));
 }
 function loadConfig() {
-  if (!fs.existsSync(CONFIG_FILE)) {
-    fs.mkdirSync(path.dirname(CONFIG_FILE), { recursive: true });
-    const defaultConfig = {
-      startingBalance: 10000000,
-      newsChannelId: null,
-      stockChannelId: null,
-      adminRoleId: null,
-      marketOpenHour: 9,
-      marketCloseHour: 18,
-      dailyNewsCount: 3,
-      maxSingleTradePercent: 30
-    };
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(defaultConfig, null, 2));
-  }
   return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
 }
 function saveConfig(data) {
@@ -145,69 +123,75 @@ function applyDailyUpdate(newsImpacts = {}) {
   return results;
 }
 
-// ── 매수 ──────────────────────────────────────────────
+// ── 매수 (환율 적용) ──────────────────────────────────
 function buyAsset(userId, ticker, quantity) {
   const user = ensureUser(userId);
   const asset = getAsset(ticker);
   if (!asset) return { success: false, message: `**${ticker}** 종목을 찾을 수 없어요.` };
   if (quantity <= 0) return { success: false, message: '수량은 1 이상이어야 해요.' };
 
-  const totalCost = asset.price * quantity;
-  if (user.balance < totalCost) {
+  const { getCurrencyByCategory, foreignToKrw, formatPriceWithKrw } = require('./currencyManager');
+  const currency = getCurrencyByCategory(asset.category || 'domestic');
+  const priceInCurrency = asset.price;
+  const priceInKrw = currency === 'KRW' ? priceInCurrency : Math.round(foreignToKrw(priceInCurrency, currency));
+  const totalCostKrw = priceInKrw * quantity;
+
+  if (user.balance < totalCostKrw) {
     return {
       success: false,
-      message: `잔액이 부족해요!\n필요: **${totalCost.toLocaleString()}원** / 보유: **${user.balance.toLocaleString()}원**`
+      message: `잔액이 부족해요!\n필요: **${totalCostKrw.toLocaleString()}원** / 보유: **${user.balance.toLocaleString()}원**`
     };
   }
 
   const users = loadUsers();
-  users[userId].balance -= totalCost;
-  
+  users[userId].balance -= totalCostKrw;
+
   if (!users[userId].portfolio[ticker]) {
-    users[userId].portfolio[ticker] = { qty: 0, avgPrice: 0, totalInvested: 0 };
+    users[userId].portfolio[ticker] = { qty: 0, avgPrice: 0, totalInvested: 0, currency };
   }
-  
+
   const pos = users[userId].portfolio[ticker];
   const newQty = pos.qty + quantity;
-  const newAvg = Math.round(((pos.avgPrice * pos.qty) + totalCost) / newQty);
-  
+  const newAvg = Math.round(((pos.avgPrice * pos.qty) + totalCostKrw) / newQty);
+
   users[userId].portfolio[ticker] = {
     qty: newQty,
     avgPrice: newAvg,
-    totalInvested: pos.totalInvested + totalCost,
+    totalInvested: (pos.totalInvested || 0) + totalCostKrw,
+    currency,
   };
 
+  users[userId].transactions = users[userId].transactions || [];
   users[userId].transactions.unshift({
     type: 'BUY',
     ticker,
     quantity,
-    price: asset.price,
-    total: totalCost,
+    price: priceInCurrency,
+    priceKrw: priceInKrw,
+    currency,
+    total: totalCostKrw,
     date: new Date().toISOString(),
   });
-  // 최근 50건만 유지
   if (users[userId].transactions.length > 50) users[userId].transactions.length = 50;
 
   saveUsers(users);
-  
-  // 거래량 업데이트
+
   const market = loadMarket();
   const section = asset.type === 'coin' ? 'coins' : 'companies';
   if (market[section][ticker]) {
-    market[section][ticker].volume += quantity;
+    market[section][ticker].volume = (market[section][ticker].volume || 0) + quantity;
     saveMarket(market);
   }
 
+  const priceDisplay = formatPriceWithKrw(priceInCurrency, currency);
   return {
     success: true,
-    message: `✅ **${asset.name}(${ticker})** ${quantity}주 매수 완료!\n💰 총 **${totalCost.toLocaleString()}원** 사용\n💵 잔액: **${users[userId].balance.toLocaleString()}원**`,
-    asset,
-    quantity,
-    totalCost,
+    message: `✅ **${asset.name}(${ticker})** ${quantity}주 매수 완료!\n💰 단가: **${priceDisplay}**\n💵 총 비용: **${totalCostKrw.toLocaleString()}원**\n🏦 잔액: **${users[userId].balance.toLocaleString()}원**`,
+    asset, quantity, totalCost: totalCostKrw, currency,
   };
 }
 
-// ── 매도 ──────────────────────────────────────────────
+// ── 매도 (환율 적용) ──────────────────────────────────
 function sellAsset(userId, ticker, quantity) {
   const user = ensureUser(userId);
   const asset = getAsset(ticker);
@@ -215,19 +199,20 @@ function sellAsset(userId, ticker, quantity) {
 
   const pos = user.portfolio[ticker];
   if (!pos || pos.qty < quantity) {
-    return {
-      success: false,
-      message: `보유 수량이 부족해요! 보유: **${pos?.qty || 0}주**`
-    };
+    return { success: false, message: `보유 수량이 부족해요! 보유: **${pos?.qty || 0}주**` };
   }
 
-  const totalGain = asset.price * quantity;
+  const { getCurrencyByCategory, foreignToKrw, formatPriceWithKrw } = require('./currencyManager');
+  const currency = getCurrencyByCategory(asset.category || 'domestic');
+  const priceInCurrency = asset.price;
+  const priceInKrw = currency === 'KRW' ? priceInCurrency : Math.round(foreignToKrw(priceInCurrency, currency));
+  const totalGainKrw = priceInKrw * quantity;
   const costBasis = pos.avgPrice * quantity;
-  const pnl = totalGain - costBasis;
+  const pnl = totalGainKrw - costBasis;
   const pnlPercent = ((pnl / costBasis) * 100).toFixed(2);
 
   const users = loadUsers();
-  users[userId].balance += totalGain;
+  users[userId].balance += totalGainKrw;
   users[userId].totalPnl = (users[userId].totalPnl || 0) + pnl;
 
   if (pos.qty === quantity) {
@@ -236,12 +221,15 @@ function sellAsset(userId, ticker, quantity) {
     users[userId].portfolio[ticker].qty -= quantity;
   }
 
+  users[userId].transactions = users[userId].transactions || [];
   users[userId].transactions.unshift({
     type: 'SELL',
     ticker,
     quantity,
-    price: asset.price,
-    total: totalGain,
+    price: priceInCurrency,
+    priceKrw: priceInKrw,
+    currency,
+    total: totalGainKrw,
     pnl,
     date: new Date().toISOString(),
   });
@@ -250,13 +238,11 @@ function sellAsset(userId, ticker, quantity) {
   saveUsers(users);
 
   const pnlEmoji = pnl >= 0 ? '📈' : '📉';
+  const priceDisplay = formatPriceWithKrw(priceInCurrency, currency);
   return {
     success: true,
-    message: `✅ **${asset.name}(${ticker})** ${quantity}주 매도 완료!\n${pnlEmoji} 손익: **${pnl >= 0 ? '+' : ''}${pnl.toLocaleString()}원** (${pnlPercent}%)\n💵 잔액: **${users[userId].balance.toLocaleString()}원**`,
-    asset,
-    quantity,
-    totalGain,
-    pnl,
+    message: `✅ **${asset.name}(${ticker})** ${quantity}주 매도 완료!\n💰 단가: **${priceDisplay}**\n${pnlEmoji} 손익: **${pnl >= 0 ? '+' : ''}${pnl.toLocaleString()}원** (${pnlPercent}%)\n🏦 잔액: **${users[userId].balance.toLocaleString()}원**`,
+    asset, quantity, totalGain: totalGainKrw, pnl, currency,
   };
 }
 

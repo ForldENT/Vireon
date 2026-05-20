@@ -1,0 +1,78 @@
+{
+  "baseCurrency": "USD",
+  "lastUpdate": null,
+  "rates": {
+    "USD": {
+      "name": "미국 달러",
+      "emoji": "🇺🇸",
+      "symbol": "$",
+      "code": "USD",
+      "rate": 1.0,
+      "baseRate": 1.0,
+      "volatility": 0.005
+    },
+    "KRW": {
+      "name": "한국 원",
+      "emoji": "🇰🇷",
+      "symbol": "₩",
+      "code": "KRW",
+      "rate": 1350.0,
+      "baseRate": 1350.0,
+      "volatility": 0.008
+    },
+    "JPY": {
+      "name": "일본 엔",
+      "emoji": "🇯🇵",
+      "symbol": "¥",
+      "code": "JPY",
+      "rate": 149.5,
+      "baseRate": 149.5,
+      "volatility": 0.007
+    },
+    "CNY": {
+      "name": "중국 위안",
+      "emoji": "🇨🇳",
+      "symbol": "¥",
+      "code": "CNY",
+      "rate": 7.24,
+      "baseRate": 7.24,
+      "volatility": 0.003
+    },
+    "EUR": {
+      "name": "유로",
+      "emoji": "🇪🇺",
+      "symbol": "€",
+      "code": "EUR",
+      "rate": 0.92,
+      "baseRate": 0.92,
+      "volatility": 0.006
+    },
+    "GBP": {
+      "name": "영국 파운드",
+      "emoji": "🇬🇧",
+      "symbol": "£",
+      "code": "GBP",
+      "rate": 0.79,
+      "baseRate": 0.79,
+      "volatility": 0.007
+    }
+  },
+  "countryCurrency": {
+    "domestic": "KRW",
+    "us": "USD",
+    "europe": "EUR",
+    "uk": "GBP",
+    "japan": "JPY",
+    "china": "CNY",
+    "space": "USD"
+  },
+  "countryInfo": {
+    "domestic": { "name": "국내", "emoji": "🇰🇷", "currency": "KRW" },
+    "us": { "name": "미국", "emoji": "🇺🇸", "currency": "USD" },
+    "europe": { "name": "유럽", "emoji": "🇪🇺", "currency": "EUR" },
+    "uk": { "name": "영국", "emoji": "🇬🇧", "currency": "GBP" },
+    "japan": { "name": "일본", "emoji": "🇯🇵", "currency": "JPY" },
+    "china": { "name": "중국", "emoji": "🇨🇳", "currency": "CNY" },
+    "space": { "name": "우주", "emoji": "🚀", "currency": "USD" }
+  }
+}
