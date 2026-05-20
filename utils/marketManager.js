@@ -8,6 +8,10 @@ const CONFIG_FILE = path.join(__dirname, '../data/config.json');
 
 // ── 파일 I/O ──────────────────────────────────────────
 function loadMarket() {
+  if (!fs.existsSync(MARKET_FILE)) {
+    fs.mkdirSync(path.dirname(MARKET_FILE), { recursive: true });
+    fs.writeFileSync(MARKET_FILE, '{"companies":{},"coins":{},"lastUpdate":null,"totalTradingDays":0}');
+  }
   return JSON.parse(fs.readFileSync(MARKET_FILE, 'utf8'));
 }
 function saveMarket(data) {
@@ -36,12 +40,16 @@ function saveNews(data) {
 function loadConfig() {
   if (!fs.existsSync(CONFIG_FILE)) {
     fs.mkdirSync(path.dirname(CONFIG_FILE), { recursive: true });
-    const defaultConfig = {
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify({
       startingBalance: 10000000,
       newsChannelId: null,
       stockChannelId: null,
-    };
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(defaultConfig, null, 2));
+      adminRoleId: null,
+      marketOpenHour: 9,
+      marketCloseHour: 18,
+      dailyNewsCount: 3,
+      maxSingleTradePercent: 30
+    }, null, 2));
   }
   return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
 }
