@@ -1,0 +1,74 @@
+{
+  "creditGrades": {
+    "1": {
+      "grade": 1,
+      "name": "최우량",
+      "emoji": "👑",
+      "color": 0xFFD700,
+      "maxLoan": 100000000,
+      "interestRate": 0.03,
+      "description": "최고 신용등급 — 최대 1억원 대출, 이자 3%"
+    },
+    "2": {
+      "grade": 2,
+      "name": "우량",
+      "emoji": "💎",
+      "color": 0x3498DB,
+      "maxLoan": 50000000,
+      "interestRate": 0.05,
+      "description": "우량 신용등급 — 최대 5천만원 대출, 이자 5%"
+    },
+    "3": {
+      "grade": 3,
+      "name": "양호",
+      "emoji": "✅",
+      "color": 0x2ECC71,
+      "maxLoan": 20000000,
+      "interestRate": 0.08,
+      "description": "양호 신용등급 — 최대 2천만원 대출, 이자 8%"
+    },
+    "4": {
+      "grade": 4,
+      "name": "보통",
+      "emoji": "📊",
+      "color": 0xF39C12,
+      "maxLoan": 10000000,
+      "interestRate": 0.12,
+      "description": "보통 신용등급 — 최대 1천만원 대출, 이자 12%"
+    },
+    "5": {
+      "grade": 5,
+      "name": "주의",
+      "emoji": "⚠️",
+      "color": 0xFF6B35,
+      "maxLoan": 3000000,
+      "interestRate": 0.18,
+      "description": "주의 신용등급 — 최대 300만원 대출, 이자 18%"
+    },
+    "6": {
+      "grade": 6,
+      "name": "위험",
+      "emoji": "🔴",
+      "color": 0xFF4757,
+      "maxLoan": 1000000,
+      "interestRate": 0.25,
+      "description": "위험 신용등급 — 최대 100만원 대출, 이자 25%"
+    },
+    "7": {
+      "grade": 7,
+      "name": "불량",
+      "emoji": "💀",
+      "color": 0x2C3E50,
+      "maxLoan": 0,
+      "interestRate": 0,
+      "description": "불량 신용등급 — 대출 불가"
+    }
+  },
+  "creditScoreRules": {
+    "loanRepaidOnTime": 10,
+    "loanRepaidLate": -5,
+    "loanDefault": -30,
+    "loanTaken": -2,
+    "activeInvestment": 1
+  }
+}
