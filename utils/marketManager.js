@@ -1,60 +1,50 @@
-const fs = require('fs');
-const path = require('path');
+const db = require('./database');
 
-const MARKET_FILE = path.join(__dirname, '../data/market.json');
-const USERS_FILE = path.join(__dirname, '../data/users.json');
-const NEWS_FILE = path.join(__dirname, '../data/news.json');
-const CONFIG_FILE = path.join(__dirname, '../data/config.json');
+// ── 메모리 캐시 ───────────────────────────────────────
+let _market = null;
+let _users = null;
+let _config = null;
 
-// ── 파일 I/O ──────────────────────────────────────────
+// ── 동기 래퍼 (기존 코드 호환) ───────────────────────
 function loadMarket() {
-  if (!fs.existsSync(MARKET_FILE)) {
-    fs.mkdirSync(path.dirname(MARKET_FILE), { recursive: true });
-    fs.writeFileSync(MARKET_FILE, JSON.stringify({"companies":{},"coins":{},"lastUpdate":null,"totalTradingDays":0}, null, 2));
-  }
-  return JSON.parse(fs.readFileSync(MARKET_FILE, 'utf8'));
+  return _market || { companies: {}, coins: {}, lastUpdate: null, totalTradingDays: 0 };
 }
 function saveMarket(data) {
-  fs.writeFileSync(MARKET_FILE, JSON.stringify(data, null, 2));
+  _market = data;
+  db.saveMarket(data).catch(e => console.error('saveMarket 오류:', e.message));
 }
 function loadUsers() {
-  if (!fs.existsSync(USERS_FILE)) {
-    fs.mkdirSync(path.dirname(USERS_FILE), { recursive: true });
-    fs.writeFileSync(USERS_FILE, '{}');
-  }
-  return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
+  return _users || {};
 }
 function saveUsers(data) {
-  fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2));
+  _users = data;
+  db.saveUsers(data).catch(e => console.error('saveUsers 오류:', e.message));
 }
 function loadNews() {
-  if (!fs.existsSync(NEWS_FILE)) {
-    fs.mkdirSync(path.dirname(NEWS_FILE), { recursive: true });
-    fs.writeFileSync(NEWS_FILE, '[]');
-  }
-  return JSON.parse(fs.readFileSync(NEWS_FILE, 'utf8'));
+  return [];
 }
 function saveNews(data) {
-  fs.writeFileSync(NEWS_FILE, JSON.stringify(data, null, 2));
+  db.saveNews(data).catch(e => console.error('saveNews 오류:', e.message));
 }
 function loadConfig() {
-  if (!fs.existsSync(CONFIG_FILE)) {
-    fs.mkdirSync(path.dirname(CONFIG_FILE), { recursive: true });
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify({
-      startingBalance: 50000000,
-      newsChannelId: null,
-      stockChannelId: null,
-      adminRoleId: null,
-      marketOpenHour: 9,
-      marketCloseHour: 18,
-      dailyNewsCount: 3,
-      maxSingleTradePercent: 30
-    }, null, 2));
-  }
-  return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+  return _config || {
+    startingBalance: 50000000,
+    newsChannelId: null,
+    stockChannelId: null,
+  };
 }
 function saveConfig(data) {
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2));
+  _config = data;
+  db.saveConfig(data).catch(e => console.error('saveConfig 오류:', e.message));
+}
+
+// ── MongoDB 초기 로드 (봇 시작시 호출) ───────────────
+async function initializeFromDB() {
+  console.log('📦 MongoDB에서 데이터 로딩...');
+  _market = await db.getMarket();
+  _users = await db.getUsers();
+  _config = await db.getConfig();
+  console.log(`✅ 로드 완료 — 종목 ${Object.keys(_market.companies||{}).length}개, 유저 ${Object.keys(_users).length}명`);
 }
 
 // ── 티커 키 해석 (한글/영문/대소문자 혼용 대응) ──────
@@ -76,9 +66,28 @@ function ensureUser(userId) {
   const users = loadUsers();
   if (!users[userId]) {
     const config = loadConfig();
+    const market = loadMarket();
+
+    // 시작 코인 10개 랜덤 지급
+    const startingPortfolio = {};
+    const coinList = Object.keys(market.coins);
+    if (coinList.length > 0) {
+      const shuffled = [...coinList].sort(() => Math.random() - 0.5);
+      const picks = shuffled.slice(0, Math.min(10, coinList.length));
+      for (const ticker of picks) {
+        const coin = market.coins[ticker];
+        startingPortfolio[ticker] = {
+          qty: 10,
+          avgPrice: coin.price,
+          totalInvested: coin.price * 10,
+          currency: 'KRW',
+        };
+      }
+    }
+
     users[userId] = {
       balance: config.startingBalance,
-      portfolio: {},
+      portfolio: startingPortfolio,
       transactions: [],
       createdAt: new Date().toISOString(),
       totalPnl: 0,
@@ -109,11 +118,11 @@ function generatePriceChange(asset, newsImpact = 0) {
   let change;
 
   if (type === 'coin') {
-    // 코인: 최대 +10000%, 최소 -1000%
+    // 코인: 최대 +1000%, 최소 -100%
     const volatility = 0.30;
     change = rand() * volatility;
     change += newsImpact * volatility * 2;
-    change = Math.max(-10.0, Math.min(100.0, change));
+    change = Math.max(-1.0, Math.min(10.0, change));
   } else {
     // 주식: 최대 +50%, 최소 -50%
     const volatility = asset.sector === '바이오' ? 0.15 : 0.10;
@@ -431,6 +440,7 @@ function forceSetPrice(ticker, newPrice) {
 }
 
 module.exports = {
+  initializeFromDB,
   loadMarket, saveMarket,
   loadUsers, saveUsers,
   loadNews, saveNews,

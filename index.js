@@ -4,6 +4,10 @@ const path = require('path');
 const http = require('http');
 const { Client, GatewayIntentBits, Collection, Events, EmbedBuilder } = require('discord.js');
 const { setClient, startScheduler } = require('./scheduler/marketScheduler');
+const { initializeFromDB } = require('./utils/marketManager');
+const { loadInventoryAsync } = require('./utils/miningManager');
+const { loadCreditAsync } = require('./utils/bankManager');
+const { connect } = require('./utils/database');
 const { buyAsset, sellAsset, loadMarket, getRankings, loadUsers, loadNews } = require('./utils/marketManager');
 const { marketOverviewEmbed, rankingEmbed, C } = require('./utils/stockEmbeds');
 const { marketControlRow } = require('./utils/stockEmbeds');
@@ -137,6 +141,18 @@ client.once(Events.ClientReady, async (c) => {
   console.log(`\n📊 ${c.user.tag} 봇 시작!`);
   console.log(`📋 ${client.commands.size}개 커맨드 로드\n`);
   c.user.setActivity('📈 /stock market', { type: 3 });
+  // MongoDB 초기화
+  try {
+    await connect();
+    await initializeFromDB();
+    await loadInventoryAsync();
+    await loadCreditAsync();
+    console.log('✅ MongoDB 데이터 로드 완료!');
+  } catch (e) {
+    console.error('❌ MongoDB 초기화 실패:', e.message);
+    console.log('⚠️ 파일 기반으로 계속 진행합니다.');
+  }
+
   setClient(c);
   startScheduler();
 

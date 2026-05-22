@@ -1,37 +1,44 @@
 const fs = require('fs');
 const path = require('path');
+const db = require('./database');
 
 const MINING_DATA_FILE = path.join(__dirname, '../data/mining_data.json');
-const MINING_INVENTORY_FILE = path.join(__dirname, '../data/mining_inventory.json');
 
 function loadMiningData() {
   return JSON.parse(fs.readFileSync(MINING_DATA_FILE, 'utf8'));
 }
 
+// ── 인벤토리 캐시 ─────────────────────────────────────
+let _inv = null;
+
+async function loadInventoryAsync() {
+  _inv = await db.getMiningInventory();
+  return _inv;
+}
+
 function loadInventory() {
-  if (!fs.existsSync(MINING_INVENTORY_FILE)) {
-    fs.mkdirSync(path.dirname(MINING_INVENTORY_FILE), { recursive: true });
-    fs.writeFileSync(MINING_INVENTORY_FILE, '{}');
-  }
-  return JSON.parse(fs.readFileSync(MINING_INVENTORY_FILE, 'utf8'));
+  return _inv || {};
 }
 
 function saveInventory(data) {
-  fs.writeFileSync(MINING_INVENTORY_FILE, JSON.stringify(data, null, 2));
+  _inv = data;
+  for (const [userId, userData] of Object.entries(data)) {
+    db.saveMiningUser(userId, userData).catch(() => {});
+  }
 }
 
 function ensureMiningUser(userId) {
-  const inv = loadInventory();
-  if (!inv[userId]) {
-    inv[userId] = {
+  if (!_inv) _inv = {};
+  if (!_inv[userId]) {
+    _inv[userId] = {
       minerals: {},
       lastMined: null,
       totalMined: 0,
       tool: 'basic',
     };
-    saveInventory(inv);
+    db.saveMiningUser(userId, _inv[userId]).catch(() => {});
   }
-  return inv[userId];
+  return _inv[userId];
 }
 
 // ── 채굴 실행 ─────────────────────────────────────────
@@ -217,6 +224,7 @@ function buyTool(userId, toolId) {
 }
 
 module.exports = {
+  loadInventoryAsync,
   mine,
   getInventory,
   sellMinerals,

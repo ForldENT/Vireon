@@ -1,23 +1,30 @@
 const fs = require('fs');
 const path = require('path');
+const db = require('./database');
 
 const BANK_DATA_FILE = path.join(__dirname, '../data/bank_data.json');
-const CREDIT_FILE = path.join(__dirname, '../data/credit.json');
 
 function loadBankData() {
   return JSON.parse(fs.readFileSync(BANK_DATA_FILE, 'utf8'));
 }
 
+// ── 신용 캐시 ─────────────────────────────────────────
+let _credit = null;
+
+async function loadCreditAsync() {
+  _credit = await db.getCredit();
+  return _credit;
+}
+
 function loadCredit() {
-  if (!fs.existsSync(CREDIT_FILE)) {
-    fs.mkdirSync(path.dirname(CREDIT_FILE), { recursive: true });
-    fs.writeFileSync(CREDIT_FILE, '{}');
-  }
-  return JSON.parse(fs.readFileSync(CREDIT_FILE, 'utf8'));
+  return _credit || {};
 }
 
 function saveCredit(data) {
-  fs.writeFileSync(CREDIT_FILE, JSON.stringify(data, null, 2));
+  _credit = data;
+  for (const [userId, userData] of Object.entries(data)) {
+    db.saveCreditUser(userId, userData).catch(() => {});
+  }
 }
 
 // ── 신용 초기화 ───────────────────────────────────────
@@ -224,6 +231,7 @@ function processOverdueLoans() {
 }
 
 module.exports = {
+  loadCreditAsync,
   ensureCredit,
   getCreditInfo,
   applyLoan,
