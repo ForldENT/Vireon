@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const { getAllAssets, loadNews, saveNews } = require('./marketManager');
 
 // ── 뉴스 템플릿 ───────────────────────────────────────
@@ -302,8 +304,6 @@ function generateDailyNews() {
 
     // 다음 업데이트에 반영될 하락 예약 저장
     try {
-      const fs = require('fs');
-      const path = require('path');
       const fakePendingFile = path.join(__dirname, '../data/fake_pending.json');
       const existing_fake = fs.existsSync(fakePendingFile)
         ? JSON.parse(fs.readFileSync(fakePendingFile, 'utf8'))
@@ -337,8 +337,6 @@ function generateDailyNews() {
 
   // ── 가짜 뉴스 하락 반영 ──────────────────────────────
   try {
-    const fs = require('fs');
-    const path = require('path');
     const fakePendingFile = path.join(__dirname, '../data/fake_pending.json');
     if (fs.existsSync(fakePendingFile)) {
       const pendingFakes = JSON.parse(fs.readFileSync(fakePendingFile, 'utf8'));

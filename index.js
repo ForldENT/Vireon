@@ -193,7 +193,7 @@ async function handleButton(interaction) {
 
   if (id === 'market_refresh') {
     await interaction.deferUpdate();
-    return interaction.editReply({ embeds: [marketOverviewEmbed(loadMarket())], components: [marketControlRow()] });
+    return interaction.editReply({ embeds: [marketOverviewEmbed(loadMarket() || {companies:{},coins:{}})], components: [marketControlRow()] });
   }
   if (id === 'market_stocks') {
     await interaction.deferUpdate();
@@ -223,7 +223,7 @@ async function handleButton(interaction) {
     const parts = id.split('_'); const ticker = parts[2]; const qty = parseInt(parts[3]);
     await interaction.deferUpdate();
     const result = buyAsset(interaction.user.id, ticker, qty);
-    return interaction.editReply({ embeds: [new EmbedBuilder().setColor(result.success ? C.bull : C.bear).setDescription(result.message)], components: [] });
+    return interaction.editReply({ embeds: [new EmbedBuilder().setColor(result.success ? C.bull : C.bear).setDescription(result.message || '처리 완료')], components: [] });
   }
   if (id === 'buy_cancel') {
     return interaction.update({ embeds: [new EmbedBuilder().setColor(C.neutral).setDescription('❌ 매수가 취소되었어요.')], components: [] });
@@ -232,7 +232,7 @@ async function handleButton(interaction) {
     const parts = id.split('_'); const ticker = parts[2]; const qty = parseInt(parts[3]);
     await interaction.deferUpdate();
     const result = sellAsset(interaction.user.id, ticker, qty);
-    return interaction.editReply({ embeds: [new EmbedBuilder().setColor(result.success ? (result.pnl >= 0 ? C.bull : C.bear) : C.bear).setDescription(result.message)], components: [] });
+    return interaction.editReply({ embeds: [new EmbedBuilder().setColor(result.success ? (result.pnl >= 0 ? C.bull : C.bear) : C.bear).setDescription(result.message || '처리 완료')], components: [] });
   }
   if (id === 'sell_cancel') {
     return interaction.update({ embeds: [new EmbedBuilder().setColor(C.neutral).setDescription('❌ 매도가 취소되었어요.')], components: [] });
@@ -240,7 +240,7 @@ async function handleButton(interaction) {
   if (id === 'mine_again') {
     await interaction.deferReply();
     const result = mine(interaction.user.id);
-    if (!result.success) return interaction.editReply({ embeds: [new EmbedBuilder().setColor(0xFF4757).setDescription(result.message)] });
+    if (!result.success) return interaction.editReply({ embeds: [new EmbedBuilder().setColor(0xFF4757).setDescription(result.message || '처리 완료')] });
     const { grade, item, gradeData, stockDrop, tool } = result;
     const GRADE_COLORS = { SSS: 16711680, SS: 16737792, S: 16766720, A: 10179002, B: 3447003, C: 9868950 };
     const embed = new EmbedBuilder().setColor(GRADE_COLORS[grade]).setTitle(`${gradeData.emoji} 채굴 완료! [${grade}등급]`).setDescription(`**${item.name}** 을(를) 발견했어요!\n💰 기본가: ${item.basePrice.toLocaleString()}원`).setTimestamp();
@@ -342,6 +342,21 @@ process.on('unhandledRejection', err => console.error('Unhandled:', err));
     await initializeFromDB();
     await loadInventoryAsync();
     await loadCreditAsync();
+
+    // market.json이 비어있으면 파일에서 로드해서 DB에 저장
+    const { loadMarket, saveMarket } = require('./utils/marketManager');
+    const market = loadMarket();
+    if (Object.keys(market.companies || {}).length === 0) {
+      const fs = require('fs');
+      const path = require('path');
+      const marketFile = path.join(__dirname, 'data/market.json');
+      if (fs.existsSync(marketFile)) {
+        const fileMarket = JSON.parse(fs.readFileSync(marketFile, 'utf8'));
+        saveMarket(fileMarket);
+        console.log(`✅ market.json → MongoDB 초기 데이터 업로드 완료 (종목 ${Object.keys(fileMarket.companies||{}).length}개)`);
+      }
+    }
+
     console.log('✅ MongoDB 사전 로드 완료!');
   } catch (e) {
     console.error('⚠️ MongoDB 사전 로드 실패, 파일 기반으로 시작:', e.message);
