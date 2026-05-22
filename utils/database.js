@@ -10,11 +10,14 @@ let db = null;
 async function connect() {
   if (db) return db;
   try {
-    client = new MongoClient(MONGO_URI, {
-      tls: true,
-      tlsAllowInvalidCertificates: false,
-      serverSelectionTimeoutMS: 5000,
-      connectTimeoutMS: 5000,
+    // URI에 SSL 파라미터 추가
+    const uri = MONGO_URI.includes('?')
+      ? MONGO_URI + '&tls=true&tlsAllowInvalidCertificates=true&retryWrites=true&w=majority'
+      : MONGO_URI + '?tls=true&tlsAllowInvalidCertificates=true&retryWrites=true&w=majority';
+    client = new MongoClient(uri, {
+      serverSelectionTimeoutMS: 10000,
+      connectTimeoutMS: 10000,
+      socketTimeoutMS: 10000,
     });
     await client.connect();
     db = client.db(DB_NAME);
