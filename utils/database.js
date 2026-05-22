@@ -10,7 +10,12 @@ let db = null;
 async function connect() {
   if (db) return db;
   try {
-    client = new MongoClient(MONGO_URI);
+    client = new MongoClient(MONGO_URI, {
+      tls: true,
+      tlsAllowInvalidCertificates: false,
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 5000,
+    });
     await client.connect();
     db = client.db(DB_NAME);
     console.log('✅ MongoDB 연결 완료!');
