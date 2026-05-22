@@ -13,7 +13,7 @@
     "mongodb": "^6.21.0",
     "node-cron": "^3.0.3"
   },
-  "engines": {
-    "node": ">=20.0.0"
-  }
+"engines": {
+  "node": "20.x"
+}
 }
