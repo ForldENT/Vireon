@@ -4,7 +4,7 @@
       "grade": "SSS",
       "probability": 0.0001,
       "count": 1,
-      "color": 0xFF0000,
+      "color": 16711680,
       "emoji": "💎",
       "items": [
         { "id": "celestite_prime", "name": "천상의 셀레스타이트", "basePrice": 50000000, "desc": "신화 속에서만 존재하던 광물" },
@@ -15,7 +15,7 @@
       "grade": "SS",
       "probability": 0.001,
       "count": 2,
-      "color": 0xFF6600,
+      "color": 16737792,
       "emoji": "🔮",
       "items": [
         { "id": "dragon_ruby", "name": "용의 루비", "basePrice": 10000000, "desc": "드래곤의 심장부에서 채굴된 루비" },
@@ -27,7 +27,7 @@
       "grade": "S",
       "probability": 0.01,
       "count": 3,
-      "color": 0xFFD700,
+      "color": 16766720,
       "emoji": "⭐",
       "items": [
         { "id": "gold_nugget", "name": "황금 덩어리", "basePrice": 2000000, "desc": "순도 99.9% 순금" },
@@ -40,7 +40,7 @@
       "grade": "A",
       "probability": 0.05,
       "count": 5,
-      "color": 0x9B59B6,
+      "color": 10181046,
       "emoji": "🟣",
       "items": [
         { "id": "amethyst", "name": "자수정", "basePrice": 500000, "desc": "보라빛 아름다운 자수정" },
@@ -55,7 +55,7 @@
       "grade": "B",
       "probability": 0.10,
       "count": 10,
-      "color": 0x3498DB,
+      "color": 3447003,
       "emoji": "🔵",
       "items": [
         { "id": "silver_ore", "name": "은 원석", "basePrice": 100000, "desc": "반짝이는 은 원석" },
@@ -75,7 +75,7 @@
       "grade": "C",
       "probability": 0.8389,
       "count": 29,
-      "color": 0x95A5A6,
+      "color": 9807270,
       "emoji": "⚪",
       "items": [
         { "id": "coal", "name": "석탄", "basePrice": 5000, "desc": "검은 석탄" },
