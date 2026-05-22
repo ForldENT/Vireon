@@ -112,13 +112,88 @@ async function sendClosingBell() {
   });
 }
 
+
+// ── 매일 아침 랜덤 주식 이벤트 ───────────────────────
+async function runDailyStockEvent() {
+  if (!client) return;
+  console.log('🎁 [이벤트] 랜덤 주식 지급 시작');
+
+  try {
+    const { loadUsers, saveUsers, loadMarket, loadConfig } = require('../utils/marketManager');
+    const { EmbedBuilder } = require('discord.js');
+
+    const users = loadUsers();
+    const market = loadMarket();
+    const config = loadConfig();
+
+    // 유저 목록 (최소 1명 이상)
+    const userIds = Object.keys(users).filter(id => !id.startsWith('_'));
+    if (userIds.length === 0) return;
+
+    // 랜덤 유저 1명 선택
+    const luckyUserId = userIds[Math.floor(Math.random() * userIds.length)];
+
+    // 랜덤 주식 1개 선택 (주식만, 코인 제외)
+    const stocks = Object.values(market.companies);
+    if (stocks.length === 0) return;
+    const luckyStock = stocks[Math.floor(Math.random() * stocks.length)];
+
+    // 주식 1주 지급
+    if (!users[luckyUserId].portfolio[luckyStock.id]) {
+      users[luckyUserId].portfolio[luckyStock.id] = {
+        qty: 0, avgPrice: luckyStock.price, totalInvested: 0, currency: 'KRW'
+      };
+    }
+    users[luckyUserId].portfolio[luckyStock.id].qty += 1;
+    users[luckyUserId].transactions = users[luckyUserId].transactions || [];
+    users[luckyUserId].transactions.unshift({
+      type: 'EVENT',
+      ticker: luckyStock.id,
+      quantity: 1,
+      price: luckyStock.price,
+      total: luckyStock.price,
+      date: new Date().toISOString(),
+    });
+    saveUsers(users);
+
+    // 채널에 발표
+    if (config.stockChannelId) {
+      const ch = await client.channels.fetch(config.stockChannelId).catch(() => null);
+      if (ch) {
+        // 유저 멘션용 Discord 유저 조회
+        const luckyUser = await client.users.fetch(luckyUserId).catch(() => null);
+        const userName = luckyUser ? `<@${luckyUserId}>` : `유저 ${luckyUserId.slice(-4)}`;
+
+        await ch.send({
+          embeds: [new EmbedBuilder()
+            .setColor(0xFFD700)
+            .setTitle('🎁 오늘의 행운 주식 이벤트!')
+            .setDescription(`오늘의 행운아는 **${userName}** 님입니다! 🎉`)
+            .addFields(
+              { name: '🎰 당첨 주식', value: `${luckyStock.emoji} **${luckyStock.name}** (${luckyStock.id})`, inline: true },
+              { name: '💰 현재가', value: `**${luckyStock.price.toLocaleString()}원**`, inline: true },
+              { name: '📦 지급 수량', value: '**1주**', inline: true },
+            )
+            .setFooter({ text: '매일 아침 9시, 랜덤 유저에게 주식 1주가 지급됩니다!' })
+            .setTimestamp()
+          ]
+        });
+        console.log(`🎁 [이벤트] ${luckyUserId}에게 ${luckyStock.id} 1주 지급 완료`);
+      }
+    }
+  } catch (e) {
+    console.error('🎁 [이벤트] 오류:', e.message);
+  }
+}
+
 // ── 스케줄 등록 ───────────────────────────────────────
 function startScheduler() {
-  // 매일 09:00 KST = UTC 00:00 — 시장 업데이트 + 환율 업데이트
+  // 매일 09:00 KST = UTC 00:00 — 시장 업데이트 + 환율 업데이트 + 이벤트
   cron.schedule('0 0 * * *', () => {
     console.log('⏰ [CRON] 일일 09:00 실행');
     runDailyMarketUpdate();
     runCurrencyUpdate();
+    runDailyStockEvent();
   });
 
   // 매일 16:00 KST = UTC 07:00 — 장 마감
@@ -128,8 +203,8 @@ function startScheduler() {
   });
 
   console.log('⏰ [스케줄러] 등록 완료');
-  console.log('  - 매일 09:00: 시장 업데이트 + 환율 업데이트');
+  console.log('  - 매일 09:00: 시장 업데이트 + 환율 업데이트 + 랜덤 주식 이벤트');
   console.log('  - 매일 16:00: 장 마감 알림');
 }
 
-module.exports = { startScheduler, runDailyMarketUpdate, runCurrencyUpdate, setClient };
+module.exports = { startScheduler, runDailyMarketUpdate, runCurrencyUpdate, runDailyStockEvent, setClient };
