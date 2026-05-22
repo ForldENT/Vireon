@@ -36,8 +36,8 @@ function ensureMiningUser(userId) {
 
 // ── 채굴 실행 ─────────────────────────────────────────
 function mine(userId) {
-  const inv = loadInventory();
   ensureMiningUser(userId);
+  const inv = loadInventory();
   const userData = inv[userId];
 
   // 쿨다운 체크
