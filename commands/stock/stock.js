@@ -13,14 +13,14 @@ module.exports = {
     .setDescription('📊 가상 주식 시장')
     .addSubcommand(sub => sub
       .setName('start')
-      .setDescription('💰 투자 시작! 초기 자금 1,000만원을 받습니다'))
+      .setDescription('💰 투자 시작! 초기 자금 5,000만원을 받습니다'))
     .addSubcommand(sub => sub
       .setName('market')
       .setDescription('📊 전체 시장 현황 보기'))
     .addSubcommand(sub => sub
       .setName('info')
       .setDescription('🔍 특정 종목 상세 정보')
-      .addStringOption(o => o.setName('ticker').setDescription('종목 티커 (예: NXCORP)').setRequired(true)))
+      .addStringOption(o => o.setName('ticker').setDescription('종목 티커 (예: 포켓몬스터)').setRequired(true)))
     .addSubcommand(sub => sub
       .setName('portfolio')
       .setDescription('💼 내 포트폴리오 조회')
