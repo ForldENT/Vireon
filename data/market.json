@@ -1,23 +1,23 @@
 {
   "companies": {
     "NXCORP": {
-      "id": "NXCORP", "name": "NexaCorp Technologies", "type": "stock",
-      "sector": "기술", "category": "domestic", "emoji": "💻",
+      "id": "ChatGPT", "name": "ChatGPT", "type": "stock",
+      "sector": "기술", "category": "us", "emoji": "💻",
       "price": 48500, "open": 48500, "high": 48500, "low": 48500,
       "volume": 0, "marketCap": 9700000000,
       "description": "AI 기반 클라우드 솔루션을 제공하는 글로벌 IT 기업",
       "history": [48500], "changePercent": 0, "createdAt": "2024-01-01", "isAdmin": false
     },
     "SKYAIR": {
-      "id": "SKYAIR", "name": "SkyAir Holdings", "type": "stock",
+      "id": "대한항공", "name": "대한항공", "type": "stock",
       "sector": "항공", "category": "domestic", "emoji": "✈️",
       "price": 12300, "open": 12300, "high": 12300, "low": 12300,
       "volume": 0, "marketCap": 2460000000,
-      "description": "아시아 최대 저비용 항공사 그룹",
+      "description": "아시아 최대 항공사 그룹",
       "history": [12300], "changePercent": 0, "createdAt": "2024-01-01", "isAdmin": false
     },
     "GREENRG": {
-      "id": "GREENRG", "name": "GreenEnergy Solutions", "type": "stock",
+      "id": "두산에너지", "name": "두산에너지", "type": "stock",
       "sector": "에너지", "category": "domestic", "emoji": "🌱",
       "price": 33800, "open": 33800, "high": 33800, "low": 33800,
       "volume": 0, "marketCap": 6760000000,
@@ -25,7 +25,7 @@
       "history": [33800], "changePercent": 0, "createdAt": "2024-01-01", "isAdmin": false
     },
     "MEDBIO": {
-      "id": "MEDBIO", "name": "MedBio Pharma", "type": "stock",
+      "id": "삼성바이오", "name": "삼성바이오", "type": "stock",
       "sector": "바이오", "category": "domestic", "emoji": "🧬",
       "price": 87200, "open": 87200, "high": 87200, "low": 87200,
       "volume": 0, "marketCap": 17440000000,
@@ -33,7 +33,7 @@
       "history": [87200], "changePercent": 0, "createdAt": "2024-01-01", "isAdmin": false
     },
     "AUTODRV": {
-      "id": "AUTODRV", "name": "AutoDrive Motors", "type": "stock",
+      "id": "현대자동차", "name": "현대자동차", "type": "stock",
       "sector": "자동차", "category": "domestic", "emoji": "🚗",
       "price": 56700, "open": 56700, "high": 56700, "low": 56700,
       "volume": 0, "marketCap": 11340000000,
@@ -41,7 +41,7 @@
       "history": [56700], "changePercent": 0, "createdAt": "2024-01-01", "isAdmin": false
     },
     "KRHOSPITAL": {
-      "id": "KRHOSPITAL", "name": "한국 병원", "type": "stock",
+      "id": "세브란스병원", "name": "세브란스병원", "type": "stock",
       "sector": "의료", "category": "domestic", "emoji": "🏥",
       "price": 43000, "open": 43000, "high": 43000, "low": 43000,
       "volume": 0, "marketCap": 8600000000,
@@ -49,7 +49,7 @@
       "history": [43000], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "DAEHANPH": {
-      "id": "DAEHANPH", "name": "대한 제약", "type": "stock",
+      "id": "LG제약", "name": "LG제약", "type": "stock",
       "sector": "제약", "category": "domestic", "emoji": "💊",
       "price": 67500, "open": 67500, "high": 67500, "low": 67500,
       "volume": 0, "marketCap": 13500000000,
@@ -57,7 +57,7 @@
       "history": [67500], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "BULDAK": {
-      "id": "BULDAK", "name": "불닭볶음사", "type": "stock",
+      "id": "GS식품", "name": "GS식품", "type": "stock",
       "sector": "식품", "category": "domestic", "emoji": "🔥",
       "price": 35000, "open": 35000, "high": 35000, "low": 35000,
       "volume": 0, "marketCap": 7000000000,
@@ -65,15 +65,15 @@
       "history": [35000], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "LSELEC": {
-      "id": "LSELEC", "name": "LS Electronic", "type": "stock",
-      "sector": "전자", "category": "us", "emoji": "🔌",
+      "id": "삼양전자", "name": "삼양전자", "type": "stock",
+      "sector": "전자", "category": "domestic", "emoji": "🔌",
       "price": 92.50, "open": 92.50, "high": 92.50, "low": 92.50,
       "volume": 0, "marketCap": 18500000000,
       "description": "글로벌 전자부품 및 전력 솔루션 전문 미국 상장 기업",
       "history": [92.50], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "MIDJEON": {
-      "id": "MIDJEON", "name": "Midjeon", "type": "stock",
+      "id": "Google", "name": "Google", "type": "stock",
       "sector": "AI", "category": "us", "emoji": "🤖",
       "price": 65.80, "open": 65.80, "high": 65.80, "low": 65.80,
       "volume": 0, "marketCap": 13160000000,
@@ -81,7 +81,7 @@
       "history": [65.80], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "EUROMED": {
-      "id": "EUROMED", "name": "EuroMed AG", "type": "stock",
+      "id": "코카콜라", "name": "코카콜라", "type": "stock",
       "sector": "제약", "category": "europe", "emoji": "💊",
       "price": 85.20, "open": 85.20, "high": 85.20, "low": 85.20,
       "volume": 0, "marketCap": 17040000000,
@@ -89,7 +89,7 @@
       "history": [85.20], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "LONDTECH": {
-      "id": "LONDTECH", "name": "LondTech PLC", "type": "stock",
+      "id": "SK테크닉", "name": "SK테크닉", "type": "stock",
       "sector": "기술", "category": "uk", "emoji": "🎩",
       "price": 42.75, "open": 42.75, "high": 42.75, "low": 42.75,
       "volume": 0, "marketCap": 8550000000,
@@ -97,7 +97,7 @@
       "history": [42.75], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "TOKYOROBO": {
-      "id": "TOKYOROBO", "name": "Tokyo Robotics", "type": "stock",
+      "id": "도쿄로봇", "name": "도쿄로봇", "type": "stock",
       "sector": "로봇", "category": "japan", "emoji": "🦾",
       "price": 4850, "open": 4850, "high": 4850, "low": 4850,
       "volume": 0, "marketCap": 970000000000,
@@ -105,7 +105,7 @@
       "history": [4850], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "SHANGHAITECH": {
-      "id": "SHANGHAITECH", "name": "Shanghai Tech", "type": "stock",
+      "id": "상하이테크", "name": "상하이테크", "type": "stock",
       "sector": "기술", "category": "china", "emoji": "🏮",
       "price": 128.50, "open": 128.50, "high": 128.50, "low": 128.50,
       "volume": 0, "marketCap": 25700000000,
@@ -113,7 +113,7 @@
       "history": [128.50], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "STARMINING": {
-      "id": "STARMINING", "name": "스타마인 코퍼레이션", "type": "stock",
+      "id": "X", "name": "X", "type": "stock",
       "sector": "우주채굴", "category": "space", "emoji": "⛏️",
       "price": 245.00, "open": 245.00, "high": 245.00, "low": 245.00,
       "volume": 0, "marketCap": 49000000000,
@@ -123,73 +123,73 @@
   },
   "coins": {
     "NXCOIN": {
-      "id": "NXCOIN", "name": "NexaCoin", "type": "coin", "sector": "레이어1", "emoji": "🔷",
+      "id": "네모네모스폰지밥", "name": "네모네모스폰지밥", "type": "coin", "sector": "레이어1", "emoji": "🔷",
       "price": 4250, "open": 4250, "high": 4250, "low": 4250, "volume": 0,
       "description": "차세대 DeFi 생태계를 위한 레이어1 블록체인",
       "history": [4250], "changePercent": 0, "createdAt": "2024-01-01", "isAdmin": false
     },
     "MOONX": {
-      "id": "MOONX", "name": "MoonX", "type": "coin", "sector": "밈코인", "emoji": "🌙",
+      "id": "톰과제리", "name": "톰과제리", "type": "coin", "sector": "밈코인", "emoji": "🌙",
       "price": 12, "open": 12, "high": 12, "low": 12, "volume": 0,
       "description": "커뮤니티 주도 밈코인, 극도의 변동성",
       "history": [12], "changePercent": 0, "createdAt": "2024-01-01", "isAdmin": false
     },
     "DATALINK": {
-      "id": "DATALINK", "name": "DataLink Protocol", "type": "coin", "sector": "오라클", "emoji": "🔗",
+      "id": "심슨", "name": "심슨", "type": "coin", "sector": "오라클", "emoji": "🔗",
       "price": 8900, "open": 8900, "high": 8900, "low": 8900, "volume": 0,
       "description": "블록체인 오라클 네트워크 프로토콜",
       "history": [8900], "changePercent": 0, "createdAt": "2024-01-01", "isAdmin": false
     },
     "METAVRS": {
-      "id": "METAVRS", "name": "MetaVerse Token", "type": "coin", "sector": "메타버스", "emoji": "🌐",
+      "id": "러브라이브", "name": "러브라이브", "type": "coin", "sector": "메타버스", "emoji": "🌐",
       "price": 2340, "open": 2340, "high": 2340, "low": 2340, "volume": 0,
-      "description": "가상현실 메타버스 생태계 기반 토큰",
+      "description": "러브라이브 기반 커뮤니티 밈코인",
       "history": [2340], "changePercent": 0, "createdAt": "2024-01-01", "isAdmin": false
     },
     "CRAYONSHIN": {
-      "id": "CRAYONSHIN", "name": "크레용 신짱", "type": "coin", "sector": "밈코인", "emoji": "🖍️",
+      "id": "크레용신짱", "name": "크레용신짱", "type": "coin", "sector": "밈코인", "emoji": "🖍️",
       "price": 55, "open": 55, "high": 55, "low": 55, "volume": 0,
       "description": "짱구는 못말려 기반 커뮤니티 밈코인",
       "history": [55], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "DORAEMON": {
-      "id": "DORAEMON", "name": "도라에몽", "type": "coin", "sector": "밈코인", "emoji": "🤖",
+      "id": "도라에몽", "name": "도라에몽", "type": "coin", "sector": "밈코인", "emoji": "🤖",
       "price": 120, "open": 120, "high": 120, "low": 120, "volume": 0,
       "description": "미래에서 온 고양이형 로봇 테마 밈코인",
       "history": [120], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "DIGIMON": {
-      "id": "DIGIMON", "name": "디지몬", "type": "coin", "sector": "밈코인", "emoji": "👾",
+      "id": "디지몬", "name": "디지몬", "type": "coin", "sector": "밈코인", "emoji": "👾",
       "price": 88, "open": 88, "high": 88, "low": 88, "volume": 0,
       "description": "디지털 몬스터 테마 커뮤니티 코인",
       "history": [88], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "ONEPIECE": {
-      "id": "ONEPIECE", "name": "원피스", "type": "coin", "sector": "밈코인", "emoji": "🏴‍☠️",
+      "id": "원피스", "name": "원피스", "type": "coin", "sector": "밈코인", "emoji": "🏴‍☠️",
       "price": 350, "open": 350, "high": 350, "low": 350, "volume": 0,
       "description": "해적왕을 꿈꾸는 자들의 코인",
       "history": [350], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "NARUTO": {
-      "id": "NARUTO", "name": "나루토", "type": "coin", "sector": "밈코인", "emoji": "🍥",
+      "id": "나루토", "name": "나루토", "type": "coin", "sector": "밈코인", "emoji": "🍥",
       "price": 280, "open": 280, "high": 280, "low": 280, "volume": 0,
       "description": "화카게가 되겠다는 집념의 닌자 테마 밈코인",
       "history": [280], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "ATTACK": {
-      "id": "ATTACK", "name": "진격의 거인", "type": "coin", "sector": "밈코인", "emoji": "⚔️",
+      "id": "진격의거인", "name": "진격의거인", "type": "coin", "sector": "밈코인", "emoji": "⚔️",
       "price": 420, "open": 420, "high": 420, "low": 420, "volume": 0,
       "description": "벽 너머의 자유를 향한 거인 테마 코인",
       "history": [420], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "CONAN": {
-      "id": "CONAN", "name": "명탐정 코난", "type": "coin", "sector": "밈코인", "emoji": "🔍",
+      "id": "명탐정코난", "name": "명탐정코난", "type": "coin", "sector": "밈코인", "emoji": "🔍",
       "price": 195, "open": 195, "high": 195, "low": 195, "volume": 0,
       "description": "진실은 언제나 하나! 추리 테마 밈코인",
       "history": [195], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "POKEMON": {
-      "id": "POKEMON", "name": "포켓몬스터", "type": "coin", "sector": "밈코인", "emoji": "⚡",
+      "id": "포켓몬스터", "name": "포켓몬스터", "type": "coin", "sector": "밈코인", "emoji": "⚡",
       "price": 780, "open": 780, "high": 780, "low": 780, "volume": 0,
       "description": "모든 포켓몬을 잡겠다는 꿈의 밈코인",
       "history": [780], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true

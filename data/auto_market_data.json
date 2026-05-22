@@ -62,26 +62,26 @@
     }
   },
   "coinPool": [
-    { "name": "NovaCoin", "emoji": "🔵", "sector": "레이어1" },
-    { "name": "StarToken", "emoji": "⭐", "sector": "DeFi" },
-    { "name": "MoonCash", "emoji": "🌕", "sector": "밈코인" },
-    { "name": "ZeroX", "emoji": "❌", "sector": "레이어2" },
-    { "name": "AquaNet", "emoji": "💧", "sector": "Web3" },
-    { "name": "PhoenixDAO", "emoji": "🔥", "sector": "거버넌스" },
-    { "name": "ShadowCoin", "emoji": "🌑", "sector": "프라이버시" },
-    { "name": "RocketFi", "emoji": "🚀", "sector": "DeFi" },
-    { "name": "CrystalToken", "emoji": "💎", "sector": "NFT" },
-    { "name": "ThunderChain", "emoji": "⚡", "sector": "레이어1" },
-    { "name": "PeachSwap", "emoji": "🍑", "sector": "DEX" },
-    { "name": "VortexDAO", "emoji": "🌀", "sector": "거버넌스" },
-    { "name": "NebulaCoin", "emoji": "🌌", "sector": "메타버스" },
-    { "name": "IronToken", "emoji": "⚙️", "sector": "인프라" },
-    { "name": "SakuraCoin", "emoji": "🌸", "sector": "밈코인" },
-    { "name": "AtomX", "emoji": "⚛️", "sector": "레이어1" },
-    { "name": "DawnToken", "emoji": "🌅", "sector": "Web3" },
-    { "name": "StealthNet", "emoji": "🥷", "sector": "프라이버시" },
-    { "name": "CosmosLink", "emoji": "🔗", "sector": "오라클" },
-    { "name": "GigaSwap", "emoji": "🔄", "sector": "DEX" }
+    { "name": "젠장티치난니가좋다", "emoji": "🔵", "sector": "레이어1" },
+    { "name": "제하하하", "emoji": "⭐", "sector": "DeFi" },
+    { "name": "위하하하하", "emoji": "🌕", "sector": "밈코인" },
+    { "name": "취소해라그말", "emoji": "❌", "sector": "레이어2" },
+    { "name": "알아", "emoji": "💧", "sector": "Web3" },
+    { "name": "탱장연", "emoji": "🔥", "sector": "거버넌스" },
+    { "name": "리그오브레전드", "emoji": "🌑", "sector": "프라이버시" },
+    { "name": "디아블로1", "emoji": "🚀", "sector": "DeFi" },
+    { "name": "디아블로2", "emoji": "💎", "sector": "NFT" },
+    { "name": "디아블로3", "emoji": "⚡", "sector": "레이어1" },
+    { "name": "이터널리턴", "emoji": "🍑", "sector": "DEX" },
+    { "name": "아웃라스트", "emoji": "🌀", "sector": "거버넌스" },
+    { "name": "백룸", "emoji": "🌌", "sector": "메타버스" },
+    { "name": "8번출구", "emoji": "⚙️", "sector": "인프라" },
+    { "name": "메이플스토리", "emoji": "🌸", "sector": "밈코인" },
+    { "name": "스타크래프트", "emoji": "⚛️", "sector": "레이어1" },
+    { "name": "리니지", "emoji": "🌅", "sector": "Web3" },
+    { "name": "봇치더락", "emoji": "🥷", "sector": "프라이버시" },
+    { "name": "최애의아이", "emoji": "🔗", "sector": "오라클" },
+    { "name": "은혼", "emoji": "🔄", "sector": "DEX" }
   ],
   "bankruptcyReasons": [
     "대규모 회계 부정 적발",
@@ -91,12 +91,23 @@
     "금융당국 영업정지 처분",
     "대규모 소송 패소",
     "주요 파트너사 계약 해지",
-    "시장 점유율 급감"
+    "시장 점유율 급감",
+    "CEO의 갑작스런 사망",
+    "글로벌 경제 위기 영향",
+    "내 귀에 도청장치가 있습니다!",
+    "열애설",
+    "회장님이 갑자기 사라졌습니다",
+    "회장님이 갑자기 돌아오셨습니다",
+    "대규모 해킹 피해",
+    "주가 조작 혐의로 수사 착수",
+    "회사의 비밀이 담긴 USB가 분실되었습니다",
+    "회사의 비밀이 담긴 USB가 발견되었습니다"
   ],
   "rugpullReasons": [
     "개발팀 전원 잠적, 수백억 규모 먹튀 의혹",
     "팀 지갑 전량 매도 후 소셜 계정 삭제",
     "스마트컨트랙트 취약점 악용, 유동성 전액 탈취",
-    "익명 팀의 갑작스런 프로젝트 종료 선언"
+    "익명 팀의 갑작스런 프로젝트 종료 선언",
+    "팀 리더의 SNS에서 사과문과 함께 전액 환불 약속"
   ]
 }

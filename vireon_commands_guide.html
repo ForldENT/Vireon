@@ -1,0 +1,192 @@
+
+<h2 class="sr-only">Vireon 봇 커맨드 가이드</h2>
+<div style="padding: 1rem 0;">
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+
+<div style="background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem;">
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+    <i class="ti ti-chart-bar" style="font-size: 18px; color: var(--color-text-info);" aria-hidden="true"></i>
+    <span style="font-size: 15px; font-weight: 500;">📊 주식 · 코인</span>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px;">
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/stock start</code>
+      <span style="color: var(--color-text-secondary);">투자 시작 (1,000만원 지급)</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/stock market</code>
+      <span style="color: var(--color-text-secondary);">전체 시장 현황</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/stock info [티커]</code>
+      <span style="color: var(--color-text-secondary);">종목 상세 정보</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/stock portfolio</code>
+      <span style="color: var(--color-text-secondary);">내 포트폴리오</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/stock history</code>
+      <span style="color: var(--color-text-secondary);">거래 내역</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/stock rank</code>
+      <span style="color: var(--color-text-secondary);">수익률 랭킹 TOP 10</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/stock news</code>
+      <span style="color: var(--color-text-secondary);">최근 뉴스</span>
+    </div>
+    <div style="border-top: 0.5px solid var(--color-border-tertiary); margin: 4px 0;"></div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/buy [티커] [수량]</code>
+      <span style="color: var(--color-text-secondary);">주식 · 코인 매수</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/sell [티커] [수량]</code>
+      <span style="color: var(--color-text-secondary);">주식 · 코인 매도</span>
+    </div>
+  </div>
+</div>
+
+<div style="background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem;">
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+    <i class="ti ti-currency-dollar" style="font-size: 18px; color: var(--color-text-success);" aria-hidden="true"></i>
+    <span style="font-size: 15px; font-weight: 500;">💱 환율</span>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px;">
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/exchange rates</code>
+      <span style="color: var(--color-text-secondary);">현재 환율 현황</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/exchange convert</code>
+      <span style="color: var(--color-text-secondary);">환전 계산</span>
+    </div>
+    <div style="margin-top: 4px; font-size: 12px; color: var(--color-text-secondary); background: var(--color-background-secondary); padding: 6px 8px; border-radius: 6px;">
+      지원 통화: 🇺🇸 USD · 🇰🇷 KRW · 🇯🇵 JPY · 🇨🇳 CNY · 🇪🇺 EUR · 🇬🇧 GBP
+    </div>
+  </div>
+
+  <div style="border-top: 0.5px solid var(--color-border-tertiary); margin: 12px 0;"></div>
+
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+    <i class="ti ti-building-bank" style="font-size: 18px; color: var(--color-text-warning);" aria-hidden="true"></i>
+    <span style="font-size: 15px; font-weight: 500;">🏦 은행 · 신용</span>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px;">
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/credit</code>
+      <span style="color: var(--color-text-secondary);">신용등급 조회 (1~7등급)</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/bank loan [금액]</code>
+      <span style="color: var(--color-text-secondary);">대출 신청</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/bank repay [금액]</code>
+      <span style="color: var(--color-text-secondary);">대출 상환</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/bank info</code>
+      <span style="color: var(--color-text-secondary);">대출 현황 확인</span>
+    </div>
+  </div>
+</div>
+
+<div style="background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem;">
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+    <i class="ti ti-pickaxe" style="font-size: 18px; color: var(--color-text-warning);" aria-hidden="true"></i>
+    <span style="font-size: 15px; font-weight: 500;">⛏️ 광산</span>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px;">
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/mine</code>
+      <span style="color: var(--color-text-secondary);">채굴 (1시간 쿨다운)</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/inventory</code>
+      <span style="color: var(--color-text-secondary);">광물 인벤토리</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/tool shop</code>
+      <span style="color: var(--color-text-secondary);">채굴 도구 상점</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/tool buy [도구]</code>
+      <span style="color: var(--color-text-secondary);">도구 구매</span>
+    </div>
+    <div style="margin-top: 4px; font-size: 12px; color: var(--color-text-secondary); background: var(--color-background-secondary); padding: 6px 8px; border-radius: 6px; line-height: 1.6;">
+      등급: 💎SSS(0.01%) · 🔮SS(0.1%) · ⭐S(1%) · 🟣A(5%) · 🔵B(10%) · ⚪C(83.89%)
+    </div>
+  </div>
+
+  <div style="border-top: 0.5px solid var(--color-border-tertiary); margin: 12px 0;"></div>
+
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+    <i class="ti ti-shopping-cart" style="font-size: 18px; color: var(--color-text-secondary);" aria-hidden="true"></i>
+    <span style="font-size: 15px; font-weight: 500;">🏪 고물상</span>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px;">
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/junk sell [광물] [수량]</code>
+      <span style="color: var(--color-text-secondary);">광물 판매</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/junk sellall</code>
+      <span style="color: var(--color-text-secondary);">전체 판매</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/junk prices</code>
+      <span style="color: var(--color-text-secondary);">광물 시세표</span>
+    </div>
+  </div>
+</div>
+
+<div style="background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem;">
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+    <i class="ti ti-settings" style="font-size: 18px; color: var(--color-text-danger);" aria-hidden="true"></i>
+    <span style="font-size: 15px; font-weight: 500;">🔧 관리자 전용</span>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px;">
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/admin create</code>
+      <span style="color: var(--color-text-secondary);">종목 생성 (국내/해외/우주/코인)</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/admin delete [티커]</code>
+      <span style="color: var(--color-text-secondary);">종목 삭제</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/admin setprice [티커] [가격]</code>
+      <span style="color: var(--color-text-secondary);">가격 강제 설정</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/admin update</code>
+      <span style="color: var(--color-text-secondary);">수동 시장 업데이트</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/admin setchannel</code>
+      <span style="color: var(--color-text-secondary);">뉴스/시장 채널 설정</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: baseline;">
+      <code style="background: var(--color-background-secondary); padding: 1px 6px; border-radius: 4px; font-size: 12px; white-space: nowrap;">/admin setbalance</code>
+      <span style="color: var(--color-text-secondary);">유저 잔액 설정</span>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div style="margin-top: 16px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 16px; font-size: 13px; color: var(--color-text-secondary); line-height: 1.8;">
+  <strong style="color: var(--color-text-primary);">자동화</strong> &nbsp;·&nbsp;
+  뉴스 · 가격 변동: 5분마다 &nbsp;|&nbsp;
+  환율 변경: 매일 09:00 &nbsp;|&nbsp;
+  장 마감: 매일 16:00 &nbsp;|&nbsp;
+  주식 자동 상장: 1시간마다 2% 확률 &nbsp;|&nbsp;
+  코인 자동 상장: 1시간마다 10% 확률 &nbsp;|&nbsp;
+  배당금: 매주 월요일 (보유 주식 1%)
+</div>
+
+</div>
