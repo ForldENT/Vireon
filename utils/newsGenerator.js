@@ -178,7 +178,27 @@ function generateDailyNews() {
       .replace(/{pct}/g, pct)
       .replace(/{partner}/g, partner);
 
-    newsImpacts[ticker] = impact;
+    // 뉴스 즉시 영향: 20%만 즉시 반영, 80%는 다음 업데이트에서 80% 확률로 적용
+    const immediateImpact = impact * 0.20;
+    newsImpacts[ticker] = immediateImpact;
+
+    // 나머지 80% 영향을 pending으로 저장
+    try {
+      const pendingNewsFile = path.join(__dirname, '../data/pending_news.json');
+      const existingPending = fs.existsSync(pendingNewsFile)
+        ? JSON.parse(fs.readFileSync(pendingNewsFile, 'utf8'))
+        : [];
+      existingPending.push({
+        ticker,
+        impact: impact * 0.80,
+        applyChance: 0.80,
+        scheduledAt: new Date().toISOString(),
+      });
+      fs.writeFileSync(pendingNewsFile, JSON.stringify(existingPending, null, 2));
+    } catch (e) {
+      console.error('뉴스 예약 저장 오류:', e.message);
+    }
+
     generatedNews.push({
       id: Date.now() + Math.random(),
       ticker,
@@ -191,6 +211,38 @@ function generateDailyNews() {
       isPositive: impact > 0,
       publishedAt: new Date().toISOString(),
     });
+  }
+
+  // ── 예약된 뉴스 영향 적용 (80% 확률) ─────────────────
+  try {
+    const pendingNewsFile = path.join(__dirname, '../data/pending_news.json');
+    if (fs.existsSync(pendingNewsFile)) {
+      const pendingNews = JSON.parse(fs.readFileSync(pendingNewsFile, 'utf8'));
+      const now = new Date();
+      const toApply = [];
+      const remaining = [];
+
+      for (const item of pendingNews) {
+        const scheduled = new Date(item.scheduledAt);
+        const hoursDiff = (now - scheduled) / (1000 * 60 * 60);
+        if (hoursDiff >= 1) {
+          toApply.push(item);
+        } else {
+          remaining.push(item);
+        }
+      }
+
+      for (const item of toApply) {
+        // 80% 확률로 실제 적용
+        if (Math.random() < item.applyChance) {
+          newsImpacts[item.ticker] = (newsImpacts[item.ticker] || 0) + item.impact;
+        }
+      }
+
+      fs.writeFileSync(pendingNewsFile, JSON.stringify(remaining, null, 2));
+    }
+  } catch (e) {
+    console.error('뉴스 예약 적용 오류:', e.message);
   }
 
   // 시장 전체 뉴스 (50% 확률)

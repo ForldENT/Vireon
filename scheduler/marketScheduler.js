@@ -132,5 +132,4 @@ function startScheduler() {
   console.log('  - 매일 16:00: 장 마감 알림');
 }
 
-const runHourlyTasks = runDailyMarketUpdate;
-module.exports = { startScheduler, runDailyMarketUpdate, runHourlyTasks, runCurrencyUpdate, setClient };
+module.exports = { startScheduler, runDailyMarketUpdate, runCurrencyUpdate, setClient };

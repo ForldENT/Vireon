@@ -3,7 +3,7 @@ const {
   createAsset, deleteAsset, forceSetPrice,
   loadConfig, saveConfig,
 } = require('../../utils/marketManager');
-const { runDailyMarketUpdate, runHourlyTasks } = require('../../scheduler/marketScheduler');
+const { runDailyMarketUpdate } = require('../../scheduler/marketScheduler');
 const { adminCreateEmbed, C } = require('../../utils/stockEmbeds');
 
 module.exports = {
@@ -60,6 +60,12 @@ module.exports = {
         { name: '📊 시장 현황 채널', value: 'stock' },
       ))
       .addChannelOption(o => o.setName('channel').setDescription('채널 선택').setRequired(true))
+    )
+
+    // 백업
+    .addSubcommand(sub => sub
+      .setName('backup')
+      .setDescription('유저 데이터를 백업합니다')
     )
 
     // 잔액 설정
@@ -162,17 +168,17 @@ module.exports = {
     if (sub === 'update') {
       await interaction.deferReply();
       try {
-        const result = await runHourlyTasks();
+        const result = await runDailyMarketUpdate();
         const count = result?.results?.length || 0;
         const newsCount = result?.news?.length || 0;
-return interaction.editReply({
-  embeds: [new EmbedBuilder()
-    .setColor(C.admin)
-    .setTitle('🔧 수동 시장 업데이트 완료')
-    .setDescription(`📊 가격 업데이트 완료\n📰 뉴스 생성 완료`)
-    .setTimestamp()
-  ],
-});
+        return interaction.editReply({
+          embeds: [new EmbedBuilder()
+            .setColor(C.admin)
+            .setTitle('🔧 수동 시장 업데이트 완료')
+            .setDescription(`📊 **${count}**개 종목 가격 업데이트\n📰 **${newsCount}**건의 뉴스 생성`)
+            .setTimestamp()
+          ],
+        });
       } catch (e) {
         return interaction.editReply({ content: `❌ 오류: ${e.message}` });
       }
@@ -193,6 +199,27 @@ return interaction.editReply({
         ],
         ephemeral: true,
       });
+    }
+
+    // ── 백업 ──────────────────────────────────────────────
+    if (sub === 'backup') {
+      await interaction.deferReply({ ephemeral: true });
+      try {
+        const { loadUsers, loadMarket } = require('../../utils/marketManager');
+        const { AttachmentBuilder } = require('discord.js');
+        const backup = {
+          timestamp: new Date().toISOString(),
+          users: loadUsers(),
+          market: loadMarket(),
+        };
+        const file = new AttachmentBuilder(
+          Buffer.from(JSON.stringify(backup, null, 2), 'utf8'),
+          { name: `vireon_backup_${Date.now()}.json` }
+        );
+        return interaction.editReply({ content: '✅ 백업 완료!', files: [file] });
+      } catch (e) {
+        return interaction.editReply({ content: `❌ 백업 실패: ${e.message}` });
+      }
     }
 
     // ── 잔액 설정 ─────────────────────────────────────

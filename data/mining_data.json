@@ -7,8 +7,18 @@
       "color": 16711680,
       "emoji": "💎",
       "items": [
-        { "id": "celestite_prime", "name": "천상의 셀레스타이트", "basePrice": 50000000, "desc": "신화 속에서만 존재하던 광물" },
-        { "id": "void_crystal", "name": "공허의 수정", "basePrice": 80000000, "desc": "우주의 공허에서 탄생한 결정체" }
+        {
+          "id": "celestite_prime",
+          "name": "천상의 셀레스타이트",
+          "basePrice": 50000000,
+          "desc": "신화 속에서만 존재하던 광물"
+        },
+        {
+          "id": "void_crystal",
+          "name": "공허의 수정",
+          "basePrice": 80000000,
+          "desc": "우주의 공허에서 탄생한 결정체"
+        }
       ]
     },
     "SS": {
@@ -18,9 +28,24 @@
       "color": 16737792,
       "emoji": "🔮",
       "items": [
-        { "id": "dragon_ruby", "name": "용의 루비", "basePrice": 10000000, "desc": "드래곤의 심장부에서 채굴된 루비" },
-        { "id": "moonstone_pure", "name": "순수 문스톤", "basePrice": 8000000, "desc": "보름달 아래서만 빛나는 돌" },
-        { "id": "star_sapphire", "name": "별의 사파이어", "basePrice": 12000000, "desc": "별빛을 담은 희귀 사파이어" }
+        {
+          "id": "dragon_ruby",
+          "name": "용의 루비",
+          "basePrice": 10000000,
+          "desc": "드래곤의 심장부에서 채굴된 루비"
+        },
+        {
+          "id": "moonstone_pure",
+          "name": "순수 문스톤",
+          "basePrice": 8000000,
+          "desc": "보름달 아래서만 빛나는 돌"
+        },
+        {
+          "id": "star_sapphire",
+          "name": "별의 사파이어",
+          "basePrice": 12000000,
+          "desc": "별빛을 담은 희귀 사파이어"
+        }
       ]
     },
     "S": {
@@ -30,10 +55,30 @@
       "color": 16766720,
       "emoji": "⭐",
       "items": [
-        { "id": "gold_nugget", "name": "황금 덩어리", "basePrice": 2000000, "desc": "순도 99.9% 순금" },
-        { "id": "platinum_ore", "name": "플래티넘 원석", "basePrice": 3000000, "desc": "희귀한 백금 원석" },
-        { "id": "pink_diamond", "name": "핑크 다이아몬드", "basePrice": 5000000, "desc": "세계에서 가장 희귀한 다이아몬드" },
-        { "id": "aurora_stone", "name": "오로라 스톤", "basePrice": 4000000, "desc": "오로라 빛을 담은 신비한 돌" }
+        {
+          "id": "gold_nugget",
+          "name": "황금 덩어리",
+          "basePrice": 2000000,
+          "desc": "순도 99.9% 순금"
+        },
+        {
+          "id": "platinum_ore",
+          "name": "플래티넘 원석",
+          "basePrice": 3000000,
+          "desc": "희귀한 백금 원석"
+        },
+        {
+          "id": "pink_diamond",
+          "name": "핑크 다이아몬드",
+          "basePrice": 5000000,
+          "desc": "세계에서 가장 희귀한 다이아몬드"
+        },
+        {
+          "id": "aurora_stone",
+          "name": "오로라 스톤",
+          "basePrice": 4000000,
+          "desc": "오로라 빛을 담은 신비한 돌"
+        }
       ]
     },
     "A": {
@@ -43,32 +88,117 @@
       "color": 10181046,
       "emoji": "🟣",
       "items": [
-        { "id": "amethyst", "name": "자수정", "basePrice": 500000, "desc": "보라빛 아름다운 자수정" },
-        { "id": "emerald", "name": "에메랄드", "basePrice": 800000, "desc": "짙은 녹색의 에메랄드" },
-        { "id": "ruby", "name": "루비", "basePrice": 700000, "desc": "붉은 빛의 루비" },
-        { "id": "sapphire", "name": "사파이어", "basePrice": 600000, "desc": "파란 사파이어" },
-        { "id": "opal", "name": "오팔", "basePrice": 450000, "desc": "무지개빛 오팔" },
-        { "id": "topaz", "name": "토파즈", "basePrice": 400000, "desc": "황금빛 토파즈" }
+        {
+          "id": "amethyst",
+          "name": "자수정",
+          "basePrice": 500000,
+          "desc": "보라빛 아름다운 자수정"
+        },
+        {
+          "id": "emerald",
+          "name": "에메랄드",
+          "basePrice": 800000,
+          "desc": "짙은 녹색의 에메랄드"
+        },
+        {
+          "id": "ruby",
+          "name": "루비",
+          "basePrice": 700000,
+          "desc": "붉은 빛의 루비"
+        },
+        {
+          "id": "sapphire",
+          "name": "사파이어",
+          "basePrice": 600000,
+          "desc": "파란 사파이어"
+        },
+        {
+          "id": "opal",
+          "name": "오팔",
+          "basePrice": 450000,
+          "desc": "무지개빛 오팔"
+        },
+        {
+          "id": "topaz",
+          "name": "토파즈",
+          "basePrice": 400000,
+          "desc": "황금빛 토파즈"
+        }
       ]
     },
     "B": {
       "grade": "B",
-      "probability": 0.10,
+      "probability": 0.1,
       "count": 10,
       "color": 3447003,
       "emoji": "🔵",
       "items": [
-        { "id": "silver_ore", "name": "은 원석", "basePrice": 100000, "desc": "반짝이는 은 원석" },
-        { "id": "copper_ore", "name": "구리 원석", "basePrice": 50000, "desc": "붉은 구리 원석" },
-        { "id": "iron_ore", "name": "철광석", "basePrice": 30000, "desc": "튼튼한 철광석" },
-        { "id": "quartz", "name": "수정", "basePrice": 80000, "desc": "맑은 수정" },
-        { "id": "turquoise", "name": "터키석", "basePrice": 120000, "desc": "하늘색 터키석" },
-        { "id": "jade", "name": "비취", "basePrice": 150000, "desc": "초록빛 비취" },
-        { "id": "obsidian", "name": "흑요석", "basePrice": 70000, "desc": "날카로운 흑요석" },
-        { "id": "lapis", "name": "청금석", "basePrice": 90000, "desc": "파란 청금석" },
-        { "id": "malachite", "name": "공작석", "basePrice": 110000, "desc": "녹색 줄무늬 공작석" },
-        { "id": "garnet", "name": "가넷", "basePrice": 130000, "desc": "짙은 붉은 가넷" },
-        { "id": "pyrite", "name": "황철석", "basePrice": 40000, "desc": "황금처럼 빛나는 황철석" }
+        {
+          "id": "silver_ore",
+          "name": "은 원석",
+          "basePrice": 100000,
+          "desc": "반짝이는 은 원석"
+        },
+        {
+          "id": "copper_ore",
+          "name": "구리 원석",
+          "basePrice": 50000,
+          "desc": "붉은 구리 원석"
+        },
+        {
+          "id": "iron_ore",
+          "name": "철광석",
+          "basePrice": 30000,
+          "desc": "튼튼한 철광석"
+        },
+        {
+          "id": "quartz",
+          "name": "수정",
+          "basePrice": 80000,
+          "desc": "맑은 수정"
+        },
+        {
+          "id": "turquoise",
+          "name": "터키석",
+          "basePrice": 120000,
+          "desc": "하늘색 터키석"
+        },
+        {
+          "id": "jade",
+          "name": "비취",
+          "basePrice": 150000,
+          "desc": "초록빛 비취"
+        },
+        {
+          "id": "obsidian",
+          "name": "흑요석",
+          "basePrice": 70000,
+          "desc": "날카로운 흑요석"
+        },
+        {
+          "id": "lapis",
+          "name": "청금석",
+          "basePrice": 90000,
+          "desc": "파란 청금석"
+        },
+        {
+          "id": "malachite",
+          "name": "공작석",
+          "basePrice": 110000,
+          "desc": "녹색 줄무늬 공작석"
+        },
+        {
+          "id": "garnet",
+          "name": "가넷",
+          "basePrice": 130000,
+          "desc": "짙은 붉은 가넷"
+        },
+        {
+          "id": "pyrite",
+          "name": "황철석",
+          "basePrice": 40000,
+          "desc": "황금처럼 빛나는 황철석"
+        }
       ]
     },
     "C": {
@@ -78,35 +208,180 @@
       "color": 9807270,
       "emoji": "⚪",
       "items": [
-        { "id": "coal", "name": "석탄", "basePrice": 5000, "desc": "검은 석탄" },
-        { "id": "limestone", "name": "석회석", "basePrice": 3000, "desc": "흰 석회석" },
-        { "id": "sandstone", "name": "사암", "basePrice": 2000, "desc": "모래빛 사암" },
-        { "id": "granite", "name": "화강암", "basePrice": 4000, "desc": "단단한 화강암" },
-        { "id": "basalt", "name": "현무암", "basePrice": 3500, "desc": "검은 현무암" },
-        { "id": "clay", "name": "점토", "basePrice": 1500, "desc": "부드러운 점토" },
-        { "id": "gravel", "name": "자갈", "basePrice": 1000, "desc": "평범한 자갈" },
-        { "id": "flint", "name": "부싯돌", "basePrice": 2500, "desc": "불꽃을 일으키는 부싯돌" },
-        { "id": "chalk", "name": "분필석", "basePrice": 1200, "desc": "하얀 분필석" },
-        { "id": "shale", "name": "혈암", "basePrice": 2800, "desc": "층층이 쌓인 혈암" },
-        { "id": "pumice", "name": "경석", "basePrice": 3200, "desc": "가벼운 경석" },
-        { "id": "slate", "name": "점판암", "basePrice": 3800, "desc": "납작한 점판암" },
-        { "id": "gypsum", "name": "석고", "basePrice": 4200, "desc": "하얀 석고" },
-        { "id": "feldspar", "name": "장석", "basePrice": 2200, "desc": "유리빛 장석" },
-        { "id": "mica", "name": "운모", "basePrice": 4500, "desc": "얇게 벗겨지는 운모" },
-        { "id": "talc", "name": "활석", "basePrice": 1800, "desc": "부드러운 활석" },
-        { "id": "dolomite", "name": "백운석", "basePrice": 2600, "desc": "흰 백운석" },
-        { "id": "andesite", "name": "안산암", "basePrice": 3100, "desc": "회색 안산암" },
-        { "id": "rhyolite", "name": "유문암", "basePrice": 3300, "desc": "분홍빛 유문암" },
-        { "id": "peridotite", "name": "감람암", "basePrice": 3600, "desc": "녹색 감람암" },
-        { "id": "schist", "name": "편암", "basePrice": 2900, "desc": "반짝이는 편암" },
-        { "id": "gneiss", "name": "편마암", "basePrice": 3400, "desc": "줄무늬 편마암" },
-        { "id": "marble", "name": "대리암", "basePrice": 4800, "desc": "하얀 대리암" },
-        { "id": "quartzite", "name": "규암", "basePrice": 4100, "desc": "단단한 규암" },
-        { "id": "hornblende", "name": "각섬석", "basePrice": 2700, "desc": "검은 각섬석" },
-        { "id": "augite", "name": "휘석", "basePrice": 2300, "desc": "짙은 휘석" },
-        { "id": "olivine", "name": "감람석", "basePrice": 5500, "desc": "녹색 감람석" },
-        { "id": "calcite", "name": "방해석", "basePrice": 3700, "desc": "투명한 방해석" },
-        { "id": "barite", "name": "중정석", "basePrice": 4600, "desc": "무거운 중정석" }
+        {
+          "id": "coal",
+          "name": "석탄",
+          "basePrice": 5000,
+          "desc": "검은 석탄"
+        },
+        {
+          "id": "limestone",
+          "name": "석회석",
+          "basePrice": 3000,
+          "desc": "흰 석회석"
+        },
+        {
+          "id": "sandstone",
+          "name": "사암",
+          "basePrice": 2000,
+          "desc": "모래빛 사암"
+        },
+        {
+          "id": "granite",
+          "name": "화강암",
+          "basePrice": 4000,
+          "desc": "단단한 화강암"
+        },
+        {
+          "id": "basalt",
+          "name": "현무암",
+          "basePrice": 3500,
+          "desc": "검은 현무암"
+        },
+        {
+          "id": "clay",
+          "name": "점토",
+          "basePrice": 1500,
+          "desc": "부드러운 점토"
+        },
+        {
+          "id": "gravel",
+          "name": "자갈",
+          "basePrice": 1000,
+          "desc": "평범한 자갈"
+        },
+        {
+          "id": "flint",
+          "name": "부싯돌",
+          "basePrice": 2500,
+          "desc": "불꽃을 일으키는 부싯돌"
+        },
+        {
+          "id": "chalk",
+          "name": "분필석",
+          "basePrice": 1200,
+          "desc": "하얀 분필석"
+        },
+        {
+          "id": "shale",
+          "name": "혈암",
+          "basePrice": 2800,
+          "desc": "층층이 쌓인 혈암"
+        },
+        {
+          "id": "pumice",
+          "name": "경석",
+          "basePrice": 3200,
+          "desc": "가벼운 경석"
+        },
+        {
+          "id": "slate",
+          "name": "점판암",
+          "basePrice": 3800,
+          "desc": "납작한 점판암"
+        },
+        {
+          "id": "gypsum",
+          "name": "석고",
+          "basePrice": 4200,
+          "desc": "하얀 석고"
+        },
+        {
+          "id": "feldspar",
+          "name": "장석",
+          "basePrice": 2200,
+          "desc": "유리빛 장석"
+        },
+        {
+          "id": "mica",
+          "name": "운모",
+          "basePrice": 4500,
+          "desc": "얇게 벗겨지는 운모"
+        },
+        {
+          "id": "talc",
+          "name": "활석",
+          "basePrice": 1800,
+          "desc": "부드러운 활석"
+        },
+        {
+          "id": "dolomite",
+          "name": "백운석",
+          "basePrice": 2600,
+          "desc": "흰 백운석"
+        },
+        {
+          "id": "andesite",
+          "name": "안산암",
+          "basePrice": 3100,
+          "desc": "회색 안산암"
+        },
+        {
+          "id": "rhyolite",
+          "name": "유문암",
+          "basePrice": 3300,
+          "desc": "분홍빛 유문암"
+        },
+        {
+          "id": "peridotite",
+          "name": "감람암",
+          "basePrice": 3600,
+          "desc": "녹색 감람암"
+        },
+        {
+          "id": "schist",
+          "name": "편암",
+          "basePrice": 2900,
+          "desc": "반짝이는 편암"
+        },
+        {
+          "id": "gneiss",
+          "name": "편마암",
+          "basePrice": 3400,
+          "desc": "줄무늬 편마암"
+        },
+        {
+          "id": "marble",
+          "name": "대리암",
+          "basePrice": 4800,
+          "desc": "하얀 대리암"
+        },
+        {
+          "id": "quartzite",
+          "name": "규암",
+          "basePrice": 4100,
+          "desc": "단단한 규암"
+        },
+        {
+          "id": "hornblende",
+          "name": "각섬석",
+          "basePrice": 2700,
+          "desc": "검은 각섬석"
+        },
+        {
+          "id": "augite",
+          "name": "휘석",
+          "basePrice": 2300,
+          "desc": "짙은 휘석"
+        },
+        {
+          "id": "olivine",
+          "name": "감람석",
+          "basePrice": 5500,
+          "desc": "녹색 감람석"
+        },
+        {
+          "id": "calcite",
+          "name": "방해석",
+          "basePrice": 3700,
+          "desc": "투명한 방해석"
+        },
+        {
+          "id": "barite",
+          "name": "중정석",
+          "basePrice": 4600,
+          "desc": "무거운 중정석"
+        }
       ]
     }
   },
@@ -114,11 +389,31 @@
     "probability": 0.05,
     "description": "5% 확률로 랜덤 주식 1주 획득"
   },
-  "miningCooldown": 3600000,
+  "miningCooldown": 600000,
   "miningTools": {
-    "basic": { "name": "기본 곡괭이", "emoji": "⛏️", "bonus": 1.0, "price": 0 },
-    "iron": { "name": "철 곡괭이", "emoji": "🔨", "bonus": 1.2, "price": 500000 },
-    "gold": { "name": "금 곡괭이", "emoji": "✨", "bonus": 1.5, "price": 2000000 },
-    "diamond": { "name": "다이아 곡괭이", "emoji": "💎", "bonus": 2.0, "price": 10000000 }
+    "basic": {
+      "name": "기본 곡괭이",
+      "emoji": "⛏️",
+      "bonus": 1.0,
+      "price": 0
+    },
+    "iron": {
+      "name": "철 곡괭이",
+      "emoji": "🔨",
+      "bonus": 1.2,
+      "price": 500000
+    },
+    "gold": {
+      "name": "금 곡괭이",
+      "emoji": "✨",
+      "bonus": 1.5,
+      "price": 2000000
+    },
+    "diamond": {
+      "name": "다이아 곡괭이",
+      "emoji": "💎",
+      "bonus": 2.0,
+      "price": 10000000
+    }
   }
 }
