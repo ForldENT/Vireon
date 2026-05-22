@@ -184,6 +184,26 @@ async function saveCreditUser(userId, data) {
   );
 }
 
+// ── currency 컬렉션 ──────────────────────────────────
+async function getCurrency() {
+  const database = await connect();
+  const col = database.collection('currency');
+  const doc = await col.findOne({ _id: 'currency' });
+  if (!doc) return null;
+  const { _id, ...data } = doc;
+  return data;
+}
+
+async function saveCurrency(currencyData) {
+  const database = await connect();
+  const col = database.collection('currency');
+  await col.updateOne(
+    { _id: 'currency' },
+    { $set: { _id: 'currency', ...currencyData } },
+    { upsert: true }
+  );
+}
+
 // ── pending delist 컬렉션 ─────────────────────────────
 async function getPendingDelist() {
   const database = await connect();
@@ -198,6 +218,34 @@ async function savePendingDelist(arr) {
   if (arr.length > 0) await col.insertMany(arr);
 }
 
+// ── pending news 컬렉션 ───────────────────────────────
+async function getPendingNews() {
+  const database = await connect();
+  const col = database.collection('pending_news');
+  return col.find({}).toArray();
+}
+
+async function savePendingNews(arr) {
+  const database = await connect();
+  const col = database.collection('pending_news');
+  await col.deleteMany({});
+  if (arr.length > 0) await col.insertMany(arr);
+}
+
+// ── fake pending 컬렉션 ───────────────────────────────
+async function getFakePending() {
+  const database = await connect();
+  const col = database.collection('fake_pending');
+  return col.find({}).toArray();
+}
+
+async function saveFakePending(arr) {
+  const database = await connect();
+  const col = database.collection('fake_pending');
+  await col.deleteMany({});
+  if (arr.length > 0) await col.insertMany(arr);
+}
+
 module.exports = {
   connect,
   getUsers, saveUsers, getUser, saveUser,
@@ -207,4 +255,7 @@ module.exports = {
   getMiningInventory, saveMiningUser,
   getCredit, saveCreditUser,
   getPendingDelist, savePendingDelist,
+  getCurrency, saveCurrency,
+  getPendingNews, savePendingNews,
+  getFakePending, saveFakePending,
 };

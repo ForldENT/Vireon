@@ -2,21 +2,27 @@ const fs = require('fs');
 const path = require('path');
 
 const AUTO_DATA_FILE = path.join(__dirname, '../data/auto_market_data.json');
-const PENDING_DELIST_FILE = path.join(__dirname, '../data/pending_delist.json');
+const db = require('./database');
 
 function loadAutoData() {
   return JSON.parse(fs.readFileSync(AUTO_DATA_FILE, 'utf8'));
 }
 
+// ── 캐시 ──────────────────────────────────────────────
+let _pendingDelist = null;
+
+async function loadPendingDelistAsync() {
+  _pendingDelist = await db.getPendingDelist();
+  return _pendingDelist;
+}
+
 function loadPendingDelist() {
-  if (!fs.existsSync(PENDING_DELIST_FILE)) {
-    fs.writeFileSync(PENDING_DELIST_FILE, '[]');
-  }
-  return JSON.parse(fs.readFileSync(PENDING_DELIST_FILE, 'utf8'));
+  return _pendingDelist || [];
 }
 
 function savePendingDelist(data) {
-  fs.writeFileSync(PENDING_DELIST_FILE, JSON.stringify(data, null, 2));
+  _pendingDelist = data;
+  db.savePendingDelist(data).catch(e => console.error('savePendingDelist 오류:', e.message));
 }
 
 // ── 랜덤 유틸 ─────────────────────────────────────────
@@ -314,6 +320,7 @@ function payDividends() {
 }
 
 module.exports = {
+  loadPendingDelistAsync,
   autoListStock,
   autoListCoin,
   triggerBankruptcyWarning,

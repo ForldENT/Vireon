@@ -1,17 +1,39 @@
 const fs = require('fs');
 const path = require('path');
+const db = require('./database');
 
 const CURRENCY_FILE = path.join(__dirname, '../data/currency.json');
 
-function loadCurrency() {
-  if (!fs.existsSync(CURRENCY_FILE)) {
-    fs.mkdirSync(path.dirname(CURRENCY_FILE), { recursive: true });
+// ── 캐시 ──────────────────────────────────────────────
+let _currency = null;
+
+async function loadCurrencyAsync() {
+  const dbData = await db.getCurrency();
+  if (dbData) {
+    _currency = dbData;
+  } else {
+    // DB에 없으면 파일에서 로드 후 DB에 저장
+    if (fs.existsSync(CURRENCY_FILE)) {
+      _currency = JSON.parse(fs.readFileSync(CURRENCY_FILE, 'utf8'));
+      await db.saveCurrency(_currency);
+      console.log('✅ currency.json → MongoDB 업로드 완료!');
+    }
   }
-  return JSON.parse(fs.readFileSync(CURRENCY_FILE, 'utf8'));
+  return _currency;
+}
+
+function loadCurrency() {
+  if (_currency) return _currency;
+  // 캐시 없으면 파일에서 읽기 (폴백)
+  if (fs.existsSync(CURRENCY_FILE)) {
+    return JSON.parse(fs.readFileSync(CURRENCY_FILE, 'utf8'));
+  }
+  return null;
 }
 
 function saveCurrency(data) {
-  fs.writeFileSync(CURRENCY_FILE, JSON.stringify(data, null, 2));
+  _currency = data;
+  db.saveCurrency(data).catch(e => console.error('saveCurrency 오류:', e.message));
 }
 
 // ── 환율 업데이트 (매일 09:00) ────────────────────────
@@ -127,6 +149,7 @@ function getAllRates() {
 }
 
 module.exports = {
+  loadCurrencyAsync,
   loadCurrency,
   updateExchangeRates,
   getRate,

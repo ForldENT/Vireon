@@ -142,7 +142,7 @@ const NEWS_TEMPLATES = {
 };
 
 // ── 뉴스 생성 엔진 ────────────────────────────────────
-function generateDailyNews() {
+async function generateDailyNews() {
   const assets = getAllAssets();
   const tickers = Object.keys(assets);
   const generatedNews = [];
@@ -186,17 +186,15 @@ function generateDailyNews() {
 
     // 나머지 80% 영향을 pending으로 저장
     try {
-      const pendingNewsFile = path.join(__dirname, '../data/pending_news.json');
-      const existingPending = fs.existsSync(pendingNewsFile)
-        ? JSON.parse(fs.readFileSync(pendingNewsFile, 'utf8'))
-        : [];
+      const dbModule = require('./database');
+      const existingPending = await dbModule.getPendingNews().catch(() => []);
       existingPending.push({
         ticker,
         impact: impact * 0.80,
         applyChance: 0.80,
         scheduledAt: new Date().toISOString(),
       });
-      fs.writeFileSync(pendingNewsFile, JSON.stringify(existingPending, null, 2));
+      await dbModule.savePendingNews(existingPending).catch(() => {});
     } catch (e) {
       console.error('뉴스 예약 저장 오류:', e.message);
     }
@@ -337,29 +335,27 @@ function generateDailyNews() {
 
   // ── 가짜 뉴스 하락 반영 ──────────────────────────────
   try {
-    const fakePendingFile = path.join(__dirname, '../data/fake_pending.json');
-    if (fs.existsSync(fakePendingFile)) {
-      const pendingFakes = JSON.parse(fs.readFileSync(fakePendingFile, 'utf8'));
-      const now = new Date();
-      const toApply = [];
-      const remaining = [];
+    const dbModule3 = require('./database');
+    const pendingFakes = await dbModule3.getFakePending().catch(() => []);
+    const now = new Date();
+    const toApply = [];
+    const remaining = [];
 
-      for (const item of pendingFakes) {
-        const scheduled = new Date(item.scheduledAt);
-        const hoursDiff = (now - scheduled) / (1000 * 60 * 60);
-        if (hoursDiff >= 1) {
-          toApply.push(item);
-        } else {
-          remaining.push(item);
-        }
+    for (const item of pendingFakes) {
+      const scheduled = new Date(item.scheduledAt);
+      const hoursDiff = (now - scheduled) / (1000 * 60 * 60);
+      if (hoursDiff >= 1) {
+        toApply.push(item);
+      } else {
+        remaining.push(item);
       }
-
-      for (const item of toApply) {
-        newsImpacts[item.ticker] = (newsImpacts[item.ticker] || 0) + item.impact;
-      }
-
-      fs.writeFileSync(fakePendingFile, JSON.stringify(remaining, null, 2));
     }
+
+    for (const item of toApply) {
+      newsImpacts[item.ticker] = (newsImpacts[item.ticker] || 0) + item.impact;
+    }
+
+    await dbModule3.saveFakePending(remaining).catch(() => {});
   } catch (e) {
     console.error('가짜 뉴스 하락 반영 오류:', e.message);
   }

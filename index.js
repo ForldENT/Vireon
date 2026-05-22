@@ -7,6 +7,8 @@ const { setClient, startScheduler } = require('./scheduler/marketScheduler');
 const { initializeFromDB } = require('./utils/marketManager');
 const { loadInventoryAsync } = require('./utils/miningManager');
 const { loadCreditAsync } = require('./utils/bankManager');
+const { loadCurrencyAsync } = require('./utils/currencyManager');
+const { loadPendingDelistAsync } = require('./utils/autoMarket');
 const { connect } = require('./utils/database');
 const { buyAsset, sellAsset, loadMarket, getRankings, loadUsers, loadNews } = require('./utils/marketManager');
 const { marketOverviewEmbed, rankingEmbed, C } = require('./utils/stockEmbeds');
@@ -157,7 +159,7 @@ client.once(Events.ClientReady, async (c) => {
     try {
       const { applyDailyUpdate } = require('./utils/marketManager');
       const { generateDailyNews } = require('./utils/newsGenerator');
-      const { news, impacts } = generateDailyNews();
+      const { news, impacts } = await generateDailyNews();
       applyDailyUpdate(impacts);
     } catch (e) {
       console.error('5분 업데이트 오류:', e.message);
@@ -342,6 +344,8 @@ process.on('unhandledRejection', err => console.error('Unhandled:', err));
     await initializeFromDB();
     await loadInventoryAsync();
     await loadCreditAsync();
+    await loadCurrencyAsync();
+    await loadPendingDelistAsync();
 
     // market.json이 비어있으면 파일에서 로드해서 DB에 저장
     const { loadMarket, saveMarket } = require('./utils/marketManager');
