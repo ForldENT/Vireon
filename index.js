@@ -240,6 +240,76 @@ async function handleButton(interaction) {
     );
     return interaction.editReply({ embeds: [embed], components: [row] });
   }
+  // 💸 파산 확정
+  if (id === 'bankruptcy_confirm') {
+    await interaction.deferUpdate();
+    try {
+      const { loadUsers, saveUsers, loadConfig } = require('./utils/marketManager');
+      const { loadCredit: lc, saveCredit: sc, calculateGrade } = require('./utils/bankManager');
+
+      const users = loadUsers();
+      const config = loadConfig();
+
+      // 신용등급 1단계 하락
+      const creditData = require('./utils/bankManager');
+      const creditInfo = creditData.getCreditInfo(interaction.user.id);
+      const creditFile = require('path').join(__dirname, 'data/credit.json');
+      const fs = require('fs');
+      if (fs.existsSync(creditFile)) {
+        const credits = JSON.parse(fs.readFileSync(creditFile, 'utf8'));
+        if (credits[interaction.user.id]) {
+          credits[interaction.user.id].grade = Math.min(credits[interaction.user.id].grade + 1, 7);
+          credits[interaction.user.id].score = Math.max(0, credits[interaction.user.id].score - 50);
+          // 대출 강제 청산
+          if (credits[interaction.user.id].loans) {
+            credits[interaction.user.id].loans = credits[interaction.user.id].loans.map(l =>
+              l.status === 'active' ? { ...l, status: 'defaulted' } : l
+            );
+          }
+          fs.writeFileSync(creditFile, JSON.stringify(credits, null, 2));
+        }
+      }
+
+      // 잔액/포트폴리오 초기화 (광물은 유지)
+      if (users[interaction.user.id]) {
+        users[interaction.user.id].balance = config.startingBalance;
+        users[interaction.user.id].portfolio = {};
+        users[interaction.user.id].transactions = [];
+        users[interaction.user.id].totalPnl = 0;
+      }
+      saveUsers(users);
+
+      return interaction.editReply({
+        embeds: [new EmbedBuilder()
+          .setColor(0xFF6B35)
+          .setTitle('💸 파산 처리 완료')
+          .setDescription(`**${interaction.user.username}**님의 파산이 처리되었어요.`)
+          .addFields(
+            { name: '💰 지급된 재기 자금', value: `**${config.startingBalance.toLocaleString()}원**`, inline: true },
+            { name: '📉 변경된 신용등급', value: `**${Math.min(creditInfo.grade + 1, 7)}등급**`, inline: true },
+            { name: '⛏️ 광물 인벤토리', value: '✅ 유지됨', inline: true },
+            { name: '💡 다음 단계', value: '`/stock market` 으로 재기를 시작하세요!', inline: false },
+          )
+          .setTimestamp()
+        ],
+        components: [],
+      });
+    } catch (e) {
+      return interaction.editReply({
+        embeds: [new EmbedBuilder().setColor(0xFF4757).setDescription(`❌ 오류: ${e.message}`)],
+        components: [],
+      });
+    }
+  }
+
+  // 💸 파산 취소
+  if (id === 'bankruptcy_cancel') {
+    return interaction.update({
+      embeds: [new EmbedBuilder().setColor(0x2ECC71).setDescription('✅ 파산 신청이 취소되었어요.')],
+      components: [],
+    });
+  }
+
   if (id === 'mine_inventory') {
     const { getInventory, loadMiningData } = require('./utils/miningManager');
     const userData = getInventory(interaction.user.id);

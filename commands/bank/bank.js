@@ -152,4 +152,46 @@ const bankCommand = {
   }
 };
 
-module.exports = { creditCommand, bankCommand };
+
+// ── /bankruptcy ───────────────────────────────────────
+const bankruptcyCommand = {
+  data: new SlashCommandBuilder()
+    .setName('bankruptcy')
+    .setDescription('💸 파산 신청 — 자산 초기화 후 재시작 (신용등급 1단계 하락)'),
+
+  async execute(interaction) {
+    const { getCreditInfo } = require('../../utils/bankManager');
+    const info = getCreditInfo(interaction.user.id);
+
+    // 확인 버튼
+    const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId('bankruptcy_confirm')
+        .setLabel('⚠️ 파산 신청 확정')
+        .setStyle(ButtonStyle.Danger),
+      new ButtonBuilder()
+        .setCustomId('bankruptcy_cancel')
+        .setLabel('❌ 취소')
+        .setStyle(ButtonStyle.Secondary),
+    );
+
+    return interaction.reply({
+      embeds: [new EmbedBuilder()
+        .setColor(0xFF4757)
+        .setTitle('💸 파산 신청')
+        .setDescription('정말로 파산 신청을 하시겠어요?\n\n아래 내용을 확인하세요:')
+        .addFields(
+          { name: '✅ 유지되는 것', value: '⛏️ 광물 인벤토리\n📊 신용 기록', inline: true },
+          { name: '❌ 초기화되는 것', value: '💰 잔액 → **5,000만원**\n📈 보유 주식/코인 전부\n💳 진행 중인 대출', inline: true },
+          { name: '📉 페널티', value: `현재 신용등급 **${info.grade}등급** → **${Math.min(info.grade + 1, 7)}등급**`, inline: false },
+        )
+        .setFooter({ text: '⚠️ 이 작업은 되돌릴 수 없습니다!' })
+      ],
+      components: [row],
+    });
+  }
+};
+
+module.exports = { creditCommand, bankCommand, bankruptcyCommand };
+

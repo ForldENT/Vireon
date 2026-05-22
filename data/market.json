@@ -67,34 +67,34 @@
     "삼양전자": {
       "id": "삼양전자", "name": "삼양전자", "type": "stock",
       "sector": "전자", "category": "domestic", "emoji": "🔌",
-      "price": 92.50, "open": 92.50, "high": 92.50, "low": 92.50,
+      "price": 92500, "open": 92500, "high": 92500, "low": 92500,
       "volume": 0, "marketCap": 18500000000,
-      "description": "글로벌 전자부품 및 전력 솔루션 전문 미국 상장 기업",
-      "history": [92.50], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
+      "description": "글로벌 전자부품 및 전력 솔루션 전문 기업",
+      "history": [92500], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "Google": {
       "id": "Google", "name": "Google", "type": "stock",
       "sector": "AI", "category": "us", "emoji": "🤖",
-      "price": 65.80, "open": 65.80, "high": 65.80, "low": 65.80,
+      "price": 65800, "open": 65800, "high": 65800, "low": 65800,
       "volume": 0, "marketCap": 13160000000,
-      "description": "생성형 AI 및 이미지 합성 기술 선도 미국 기업",
-      "history": [65.80], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
+      "description": "생성형 AI 및 검색 기술 선도 미국 기업",
+      "history": [65800], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "코카콜라": {
       "id": "코카콜라", "name": "코카콜라", "type": "stock",
-      "sector": "제약", "category": "europe", "emoji": "💊",
-      "price": 85.20, "open": 85.20, "high": 85.20, "low": 85.20,
+      "sector": "식품", "category": "us", "emoji": "🥤",
+      "price": 85200, "open": 85200, "high": 85200, "low": 85200,
       "volume": 0, "marketCap": 17040000000,
-      "description": "유럽 최대 제약 그룹, 혁신 신약 개발",
-      "history": [85.20], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
+      "description": "전 세계 1위 음료 브랜드",
+      "history": [85200], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "SK테크닉": {
       "id": "SK테크닉", "name": "SK테크닉", "type": "stock",
       "sector": "기술", "category": "uk", "emoji": "🎩",
-      "price": 42.75, "open": 42.75, "high": 42.75, "low": 42.75,
+      "price": 42750, "open": 42750, "high": 42750, "low": 42750,
       "volume": 0, "marketCap": 8550000000,
       "description": "영국 핀테크 및 AI 솔루션 선도 기업",
-      "history": [42.75], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
+      "history": [42750], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "도쿄로봇": {
       "id": "도쿄로봇", "name": "도쿄로봇", "type": "stock",
@@ -107,41 +107,41 @@
     "상하이테크": {
       "id": "상하이테크", "name": "상하이테크", "type": "stock",
       "sector": "기술", "category": "china", "emoji": "🏮",
-      "price": 128.50, "open": 128.50, "high": 128.50, "low": 128.50,
+      "price": 128500, "open": 128500, "high": 128500, "low": 128500,
       "volume": 0, "marketCap": 25700000000,
       "description": "중국 최대 IT 플랫폼 기업",
-      "history": [128.50], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
+      "history": [128500], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     },
     "X": {
       "id": "X", "name": "X", "type": "stock",
       "sector": "우주채굴", "category": "space", "emoji": "⛏️",
-      "price": 245.00, "open": 245.00, "high": 245.00, "low": 245.00,
+      "price": 245000, "open": 245000, "high": 245000, "low": 245000,
       "volume": 0, "marketCap": 49000000000,
       "description": "소행성 자원 채굴 선도 우주 기업",
-      "history": [245.00], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
+      "history": [245000], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
     }
   },
   "coins": {
     "네모네모스폰지밥": {
-      "id": "네모네모스폰지밥", "name": "네모네모스폰지밥", "type": "coin", "sector": "레이어1", "emoji": "🔷",
+      "id": "네모네모스폰지밥", "name": "네모네모스폰지밥", "type": "coin", "sector": "밈코인", "emoji": "🧽",
       "price": 4250, "open": 4250, "high": 4250, "low": 4250, "volume": 0,
-      "description": "차세대 DeFi 생태계를 위한 레이어1 블록체인",
+      "description": "비키니 시티 바닷속 밈코인",
       "history": [4250], "changePercent": 0, "createdAt": "2024-01-01", "isAdmin": false
     },
     "톰과제리": {
-      "id": "톰과제리", "name": "톰과제리", "type": "coin", "sector": "밈코인", "emoji": "🌙",
+      "id": "톰과제리", "name": "톰과제리", "type": "coin", "sector": "밈코인", "emoji": "🐭",
       "price": 12, "open": 12, "high": 12, "low": 12, "volume": 0,
-      "description": "커뮤니티 주도 밈코인, 극도의 변동성",
+      "description": "영원한 추격전 테마 밈코인",
       "history": [12], "changePercent": 0, "createdAt": "2024-01-01", "isAdmin": false
     },
     "심슨": {
-      "id": "심슨", "name": "심슨", "type": "coin", "sector": "오라클", "emoji": "🔗",
+      "id": "심슨", "name": "심슨", "type": "coin", "sector": "밈코인", "emoji": "🍩",
       "price": 8900, "open": 8900, "high": 8900, "low": 8900, "volume": 0,
-      "description": "블록체인 오라클 네트워크 프로토콜",
+      "description": "스프링필드 가족 테마 밈코인",
       "history": [8900], "changePercent": 0, "createdAt": "2024-01-01", "isAdmin": false
     },
     "러브라이브": {
-      "id": "러브라이브", "name": "러브라이브", "type": "coin", "sector": "메타버스", "emoji": "🌐",
+      "id": "러브라이브", "name": "러브라이브", "type": "coin", "sector": "밈코인", "emoji": "🌐",
       "price": 2340, "open": 2340, "high": 2340, "low": 2340, "volume": 0,
       "description": "러브라이브 기반 커뮤니티 밈코인",
       "history": [2340], "changePercent": 0, "createdAt": "2024-01-01", "isAdmin": false
@@ -193,6 +193,66 @@
       "price": 780, "open": 780, "high": 780, "low": 780, "volume": 0,
       "description": "모든 포켓몬을 잡겠다는 꿈의 밈코인",
       "history": [780], "changePercent": 0, "createdAt": "2025-05-19", "isAdmin": true
+    },
+    "귀멸의칼날": {
+      "id": "귀멸의칼날", "name": "귀멸의칼날", "type": "coin", "sector": "밈코인", "emoji": "🗡️",
+      "price": 530, "open": 530, "high": 530, "low": 530, "volume": 0,
+      "description": "전호흡으로 부자가 되자! 귀멸 테마 밈코인",
+      "history": [530], "changePercent": 0, "createdAt": "2025-05-22", "isAdmin": true
+    },
+    "주술회전": {
+      "id": "주술회전", "name": "주술회전", "type": "coin", "sector": "밈코인", "emoji": "🔮",
+      "price": 445, "open": 445, "high": 445, "low": 445, "volume": 0,
+      "description": "저주 에너지로 수익을 창출하는 밈코인",
+      "history": [445], "changePercent": 0, "createdAt": "2025-05-22", "isAdmin": true
+    },
+    "드래곤볼": {
+      "id": "드래곤볼", "name": "드래곤볼", "type": "coin", "sector": "밈코인", "emoji": "🐉",
+      "price": 920, "open": 920, "high": 920, "low": 920, "volume": 0,
+      "description": "7개를 모으면 부자가 된다! 드래곤볼 밈코인",
+      "history": [920], "changePercent": 0, "createdAt": "2025-05-22", "isAdmin": true
+    },
+    "헌터헌터": {
+      "id": "헌터헌터", "name": "헌터헌터", "type": "coin", "sector": "밈코인", "emoji": "🎯",
+      "price": 310, "open": 310, "high": 310, "low": 310, "volume": 0,
+      "description": "넨으로 투자하는 헌터 테마 밈코인",
+      "history": [310], "changePercent": 0, "createdAt": "2025-05-22", "isAdmin": true
+    },
+    "원펀맨": {
+      "id": "원펀맨", "name": "원펀맨", "type": "coin", "sector": "밈코인", "emoji": "👊",
+      "price": 670, "open": 670, "high": 670, "low": 670, "volume": 0,
+      "description": "한 방에 모든 걸 해결하는 원펀 밈코인",
+      "history": [670], "changePercent": 0, "createdAt": "2025-05-22", "isAdmin": true
+    },
+    "메이플스토리": {
+      "id": "메이플스토리", "name": "메이플스토리", "type": "coin", "sector": "게임", "emoji": "🍁",
+      "price": 1250, "open": 1250, "high": 1250, "low": 1250, "volume": 0,
+      "description": "메이플 세계의 메소로 만든 게임 테마 코인",
+      "history": [1250], "changePercent": 0, "createdAt": "2025-05-22", "isAdmin": true
+    },
+    "리그오브레전드": {
+      "id": "리그오브레전드", "name": "리그오브레전드", "type": "coin", "sector": "게임", "emoji": "⚔️",
+      "price": 860, "open": 860, "high": 860, "low": 860, "volume": 0,
+      "description": "소환사의 협곡에서 탄생한 게임 테마 코인",
+      "history": [860], "changePercent": 0, "createdAt": "2025-05-22", "isAdmin": true
+    },
+    "스타크래프트": {
+      "id": "스타크래프트", "name": "스타크래프트", "type": "coin", "sector": "게임", "emoji": "🚀",
+      "price": 990, "open": 990, "high": 990, "low": 990, "volume": 0,
+      "description": "저그, 테란, 프로토스의 전쟁에서 탄생한 코인",
+      "history": [990], "changePercent": 0, "createdAt": "2025-05-22", "isAdmin": true
+    },
+    "마인크래프트": {
+      "id": "마인크래프트", "name": "마인크래프트", "type": "coin", "sector": "게임", "emoji": "⛏️",
+      "price": 740, "open": 740, "high": 740, "low": 740, "volume": 0,
+      "description": "블록으로 세상을 만드는 마인크래프트 테마 코인",
+      "history": [740], "changePercent": 0, "createdAt": "2025-05-22", "isAdmin": true
+    },
+    "페르소나": {
+      "id": "페르소나", "name": "페르소나", "type": "coin", "sector": "게임", "emoji": "🃏",
+      "price": 580, "open": 580, "high": 580, "low": 580, "volume": 0,
+      "description": "페르소나 시리즈 테마 게임 코인",
+      "history": [580], "changePercent": 0, "createdAt": "2025-05-22", "isAdmin": true
     }
   },
   "lastUpdate": null,

@@ -41,7 +41,7 @@ function loadConfig() {
   if (!fs.existsSync(CONFIG_FILE)) {
     fs.mkdirSync(path.dirname(CONFIG_FILE), { recursive: true });
     fs.writeFileSync(CONFIG_FILE, JSON.stringify({
-      startingBalance: 10000000,
+      startingBalance: 50000000,
       newsChannelId: null,
       stockChannelId: null,
       adminRoleId: null,
@@ -109,11 +109,11 @@ function generatePriceChange(asset, newsImpact = 0) {
   let change;
 
   if (type === 'coin') {
-    // 코인: 최대 +10000%, 최소 -100%
-    const volatility = 0.50;
+    // 코인: 최대 +10000%, 최소 -1000%
+    const volatility = 0.30;
     change = rand() * volatility;
     change += newsImpact * volatility * 2;
-    change = Math.max(-1.0, Math.min(100.0, change));
+    change = Math.max(-10.0, Math.min(100.0, change));
   } else {
     // 주식: 최대 +50%, 최소 -50%
     const volatility = asset.sector === '바이오' ? 0.15 : 0.10;
