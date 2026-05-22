@@ -68,26 +68,9 @@ function ensureUser(userId) {
     const config = loadConfig();
     const market = loadMarket();
 
-    // 시작 코인 10개 랜덤 지급
-    const startingPortfolio = {};
-    const coinList = Object.keys(market.coins);
-    if (coinList.length > 0) {
-      const shuffled = [...coinList].sort(() => Math.random() - 0.5);
-      const picks = shuffled.slice(0, Math.min(10, coinList.length));
-      for (const ticker of picks) {
-        const coin = market.coins[ticker];
-        startingPortfolio[ticker] = {
-          qty: 10,
-          avgPrice: coin.price,
-          totalInvested: coin.price * 10,
-          currency: 'KRW',
-        };
-      }
-    }
-
     users[userId] = {
       balance: config.startingBalance,
-      portfolio: startingPortfolio,
+      portfolio: {},
       transactions: [],
       createdAt: new Date().toISOString(),
       totalPnl: 0,
@@ -118,11 +101,11 @@ function generatePriceChange(asset, newsImpact = 0) {
   let change;
 
   if (type === 'coin') {
-    // 코인: 최대 +1000%, 최소 -100%
-    const volatility = 0.30;
+    // 코인: 최대 +10000%, 최소 -1000%
+    const volatility = 0.50;
     change = rand() * volatility;
     change += newsImpact * volatility * 2;
-    change = Math.max(-1.0, Math.min(10.0, change));
+    change = Math.max(-10.0, Math.min(100.0, change));
   } else {
     // 주식: 최대 +50%, 최소 -50%
     const volatility = asset.sector === '바이오' ? 0.15 : 0.10;

@@ -15,7 +15,7 @@ const { mine } = require('./utils/miningManager');
 const { processOverdueLoans } = require('./utils/bankManager');
 
 // ── HTTP 서버 (웹 대시보드 + API) ─────────────────────
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   const url = req.url;
 
   // CORS 헤더
@@ -25,7 +25,12 @@ const server = http.createServer((req, res) => {
   // ── API: 시장 데이터 ─────────────────────────────────
   if (url === '/api/market') {
     try {
-      const market = loadMarket();
+      let market = loadMarket();
+      // 캐시가 비어있으면 DB에서 직접 로드
+      if (!market || Object.keys(market.companies || {}).length === 0) {
+        const db = require('./utils/database');
+        market = await db.getMarket();
+      }
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify(market));
     } catch (e) {
@@ -51,8 +56,11 @@ const server = http.createServer((req, res) => {
   // ── API: 랭킹 데이터 ─────────────────────────────────
   if (url === '/api/rankings') {
     try {
-      const users = loadUsers();
-      const market = loadMarket();
+      const db = require('./utils/database');
+      let users = loadUsers();
+      let market = loadMarket();
+      if (Object.keys(users).length === 0) users = await db.getUsers();
+      if (Object.keys(market.companies || {}).length === 0) market = await db.getMarket();
       const rankings = Object.entries(users)
         .filter(([id]) => !id.startsWith('_'))
         .map(([userId, userData]) => {
