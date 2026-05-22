@@ -4,7 +4,7 @@ const {
   loadConfig, saveConfig,
 } = require('../../utils/marketManager');
 const { runDailyMarketUpdate } = require('../../scheduler/marketScheduler');
-const { adminCreateEmbed, C } = require('../../utils/stockEmbeds');
+const { C } = require('../../utils/stockEmbeds');
 
 module.exports = {
   data: new SlashCommandBuilder()
