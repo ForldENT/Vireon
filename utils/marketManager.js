@@ -4,6 +4,7 @@ const db = require('./database');
 let _market = null;
 let _users = null;
 let _config = null;
+let _news = [];
 
 // ── 동기 래퍼 (기존 코드 호환) ───────────────────────
 function loadMarket() {
@@ -21,9 +22,10 @@ function saveUsers(data) {
   db.saveUsers(data).catch(e => console.error('saveUsers 오류:', e.message));
 }
 function loadNews() {
-  return [];
+  return _news || [];
 }
 function saveNews(data) {
+  _news = data;
   db.saveNews(data).catch(e => console.error('saveNews 오류:', e.message));
 }
 function loadConfig() {
@@ -44,7 +46,8 @@ async function initializeFromDB() {
   _market = await db.getMarket();
   _users = await db.getUsers();
   _config = await db.getConfig();
-  console.log(`✅ 로드 완료 — 종목 ${Object.keys(_market.companies||{}).length}개, 유저 ${Object.keys(_users).length}명`);
+  _news = await db.getNews();
+  console.log(`✅ 로드 완료 — 종목 ${Object.keys(_market.companies||{}).length}개, 유저 ${Object.keys(_users).length}명, 뉴스 ${_news.length}건`);
 }
 
 // ── 티커 키 해석 (한글/영문/대소문자 혼용 대응) ──────
@@ -130,8 +133,15 @@ function applyDailyUpdate(newsImpacts = {}) {
       const oldPrice = asset.price;
       let newPrice;
       if (asset.type === 'coin') {
-        // 코인은 소수점 2자리까지 허용 (1원 고착 방지)
-        newPrice = Math.max(1, parseFloat((oldPrice * (1 + changeRate)).toFixed(2)));
+        const raw = oldPrice * (1 + changeRate);
+        if (oldPrice >= 10) {
+          newPrice = Math.max(1, Math.round(raw));
+        } else if (oldPrice >= 1) {
+          // 1~10원 구간: 소수점 1자리
+          newPrice = Math.max(1, parseFloat(raw.toFixed(1)));
+        } else {
+          newPrice = Math.max(1, parseFloat(raw.toFixed(2)));
+        }
       } else {
         newPrice = Math.max(1, Math.round(oldPrice * (1 + changeRate)));
       }
@@ -157,6 +167,10 @@ function applyDailyUpdate(newsImpacts = {}) {
   return results;
 }
 
+// ── 쌀먹 방지 쿨다운 (종목별 마지막 매도 시간) ────────
+const sellCooldowns = {};
+const SELL_COOLDOWN_MS = 5 * 60 * 1000; // 5분
+
 // ── 매수 (환율 적용) ──────────────────────────────────
 function buyAsset(userId, ticker, quantity) {
   const user = ensureUser(userId);
@@ -164,6 +178,16 @@ function buyAsset(userId, ticker, quantity) {
   const asset = getAsset(key);
   if (!asset) return { success: false, message: `**${ticker}** 종목을 찾을 수 없어요.` };
   if (quantity <= 0) return { success: false, message: '수량은 1 이상이어야 해요.' };
+
+  // 쌀먹 방지 - 매도 후 5분간 같은 종목 매수 불가
+  const cooldownKey = `${userId}_${key}`;
+  if (sellCooldowns[cooldownKey]) {
+    const elapsed = Date.now() - sellCooldowns[cooldownKey];
+    if (elapsed < SELL_COOLDOWN_MS) {
+      const remaining = Math.ceil((SELL_COOLDOWN_MS - elapsed) / 1000);
+      return { success: false, message: `⏰ 매도 후 **${Math.ceil(remaining/60)}분 ${remaining%60}초** 후에 같은 종목을 매수할 수 있어요! (쌀먹 방지)` };
+    }
+  }
 
   const { getCurrencyByCategory, foreignToKrw, formatPriceWithKrw } = require('./currencyManager');
   const currency = getCurrencyByCategory(asset.category || 'domestic');
@@ -272,6 +296,11 @@ function sellAsset(userId, ticker, quantity) {
   if (users[userId].transactions.length > 50) users[userId].transactions.length = 50;
 
   saveUsers(users);
+
+  // 쌀먹 방지 쿨다운 등록
+  const cooldownKey = `${userId}_${key}`;
+  sellCooldowns[cooldownKey] = Date.now();
+  setTimeout(() => delete sellCooldowns[cooldownKey], SELL_COOLDOWN_MS);
 
   const pnlEmoji = pnl >= 0 ? '📈' : '📉';
   const priceDisplay = formatPriceWithKrw(priceInCurrency, currency);
