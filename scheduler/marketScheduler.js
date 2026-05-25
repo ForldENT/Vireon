@@ -3,6 +3,12 @@ const { applyDailyUpdate, loadConfig, loadMarket } = require('../utils/marketMan
 const { generateDailyNews } = require('../utils/newsGenerator');
 const { newsEmbed, marketOverviewEmbed, marketControlRow } = require('../utils/stockEmbeds');
 const { updateExchangeRates } = require('../utils/currencyManager');
+const {
+  autoListStock, autoListCoin,
+  triggerBankruptcyWarning, triggerCoinDelist,
+  processPendingDelists, payDividends,
+  loadPendingDelistAsync,
+} = require('../utils/autoMarket');
 
 let client = null;
 
@@ -95,6 +101,134 @@ async function runCurrencyUpdate() {
 }
 
 // ── 장 마감 알림 ──────────────────────────────────────
+// ── 1원 코인 자동 상장폐지 ───────────────────────────
+async function removeDeadCoins() {
+  if (!client) return;
+  try {
+    const { loadMarket, saveMarket } = require('../utils/marketManager');
+    const { EmbedBuilder } = require('discord.js');
+    const config = loadConfig();
+    const market = loadMarket();
+    const deadCoins = Object.entries(market.coins).filter(([, a]) => a.price <= 1);
+
+    if (deadCoins.length === 0) return;
+
+    const ch = config.newsChannelId
+      ? await client.channels.fetch(config.newsChannelId).catch(() => null)
+      : null;
+
+    for (const [ticker, coin] of deadCoins) {
+      delete market.coins[ticker];
+      console.log(`📛 [자동폐지] ${ticker} 가격 1원으로 상장폐지`);
+      if (ch) {
+        await ch.send({
+          embeds: [new EmbedBuilder()
+            .setColor(0xED4245)
+            .setTitle('📛 코인 상장폐지')
+            .setDescription(`**${coin.emoji} ${coin.name}** (${ticker}) 가격 하락으로 상장폐지되었습니다.`)
+            .addFields({ name: '💰 최종가', value: '1원' })
+            .setTimestamp()
+          ]
+        });
+      }
+    }
+    saveMarket(market);
+  } catch (e) {
+    console.error('자동폐지 오류:', e.message);
+  }
+}
+
+// ── 1시간마다 자동화 ──────────────────────────────────
+async function runHourlyTasks() {
+  if (!client) return;
+  console.log('⏰ [1시간] 자동화 작업 시작');
+  const { EmbedBuilder } = require('discord.js');
+  const config = loadConfig();
+  const newsCh = config.newsChannelId
+    ? await client.channels.fetch(config.newsChannelId).catch(() => null)
+    : null;
+
+  // 2% 확률 주식 자동 상장
+  try {
+    if (Math.random() < 0.02) {
+      const result = autoListStock();
+      if (result && newsCh) {
+        await newsCh.send({
+          embeds: [new EmbedBuilder()
+            .setColor(0x00D26A)
+            .setTitle(`🎉 신규 주식 상장!`)
+            .setDescription(`**${result.emoji} ${result.name}** (${result.ticker}) 상장!`)
+            .addFields(
+              { name: '💰 공모가', value: `${result.price.toLocaleString()}원`, inline: true },
+              { name: '🏭 섹터', value: result.sector, inline: true },
+            ).setTimestamp()
+          ]
+        });
+      }
+    }
+  } catch (e) { console.error('주식상장 오류:', e.message); }
+
+  // 10% 확률 코인 자동 상장
+  try {
+    if (Math.random() < 0.10) {
+      const result = autoListCoin();
+      if (result && newsCh) {
+        await newsCh.send({
+          embeds: [new EmbedBuilder()
+            .setColor(0xF7931A)
+            .setTitle('🪙 신규 코인 상장!')
+            .setDescription(`**${result.emoji} ${result.name}** (${result.ticker}) 상장!`)
+            .addFields({ name: '💰 초기가', value: `${result.price.toLocaleString()}원`, inline: true })
+            .setTimestamp()
+          ]
+        });
+      }
+    }
+  } catch (e) { console.error('코인상장 오류:', e.message); }
+
+  // 0.001% 확률 부도 위기
+  try {
+    if (Math.random() < 0.00001) {
+      const result = triggerBankruptcyWarning();
+      if (result && newsCh) {
+        await newsCh.send({
+          embeds: [new EmbedBuilder()
+            .setColor(0xFF6B35)
+            .setTitle('⚠️ 긴급! 부도 위기')
+            .setDescription(`**${result.emoji} ${result.name}** 부도 위기!`)
+            .addFields(
+              { name: '📋 사유', value: result.reason },
+              { name: '⏰ 예상 폐지', value: `${result.daysUntilDelist}일 후` },
+            ).setTimestamp()
+          ]
+        });
+      }
+    }
+  } catch (e) { console.error('부도위기 오류:', e.message); }
+
+  // 만료된 부도 처리
+  try {
+    const delisted = processPendingDelists();
+    for (const item of delisted) {
+      if (newsCh) {
+        await newsCh.send({
+          embeds: [new EmbedBuilder()
+            .setColor(0xED4245)
+            .setTitle('📛 상장폐지')
+            .setDescription(`**${item.name}** 상장폐지`)
+            .setTimestamp()
+          ]
+        });
+      }
+    }
+  } catch (e) { console.error('부도처리 오류:', e.message); }
+
+  // 1원 코인 자동폐지
+  await removeDeadCoins();
+
+  console.log('✅ [1시간] 완료');
+}
+
 async function sendClosingBell() {
   if (!client) return;
   const config = loadConfig();
@@ -188,6 +322,53 @@ async function runDailyStockEvent() {
 
 // ── 스케줄 등록 ───────────────────────────────────────
 function startScheduler() {
+  // 1분마다 — 코인 폐지 체크 (0.01% 확률)
+  cron.schedule('* * * * *', async () => {
+    if (Math.random() < 0.0001) {
+      const result = triggerCoinDelist(false);
+      if (result) {
+        const config = loadConfig();
+        const { EmbedBuilder } = require('discord.js');
+        if (config.newsChannelId && client) {
+          const ch = await client.channels.fetch(config.newsChannelId).catch(() => null);
+          if (ch) await ch.send({
+            embeds: [new EmbedBuilder().setColor(0xED4245)
+              .setTitle('🪙 코인 폐지').setDescription(`**${result.emoji} ${result.name}** 운영 종료`).setTimestamp()]
+          });
+        }
+      }
+    }
+    // 먹튀 (0.001% 확률)
+    if (Math.random() < 0.00001) {
+      const result = triggerCoinDelist(true);
+      if (result) {
+        const config = loadConfig();
+        const { EmbedBuilder } = require('discord.js');
+        if (config.newsChannelId && client) {
+          const ch = await client.channels.fetch(config.newsChannelId).catch(() => null);
+          if (ch) await ch.send({
+            embeds: [new EmbedBuilder().setColor(0xFF0000)
+              .setTitle('🚨 코인 먹튀!').setDescription(`**${result.emoji} ${result.name}**
+💥 ${result.reason}`).setTimestamp()]
+          });
+        }
+      }
+    }
+  });
+
+  // 1시간마다 — 자동 상장/폐지
+  cron.schedule('0 * * * *', () => {
+    console.log('⏰ [CRON] 1시간 자동화');
+    runHourlyTasks();
+  });
+
+  // 매주 월요일 09:00 KST — 배당금
+  cron.schedule('0 0 * * 1', () => {
+    console.log('💸 [CRON] 배당금 지급');
+    const results = payDividends();
+    console.log(`배당금 ${results.length}명 지급 완료`);
+  });
+
   // 매일 09:00 KST = UTC 00:00 — 시장 업데이트 + 환율 업데이트 + 이벤트
   cron.schedule('0 0 * * *', () => {
     console.log('⏰ [CRON] 일일 09:00 실행');
@@ -207,4 +388,4 @@ function startScheduler() {
   console.log('  - 매일 16:00: 장 마감 알림');
 }
 
-module.exports = { startScheduler, runDailyMarketUpdate, runCurrencyUpdate, runDailyStockEvent, setClient };
+module.exports = { startScheduler, runDailyMarketUpdate, runHourlyTasks, runCurrencyUpdate, runDailyStockEvent, setClient };

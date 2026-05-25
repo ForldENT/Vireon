@@ -128,7 +128,13 @@ function applyDailyUpdate(newsImpacts = {}) {
       const changeRate = generatePriceChange(asset, impact);
 
       const oldPrice = asset.price;
-      const newPrice = Math.max(1, Math.round(oldPrice * (1 + changeRate)));
+      let newPrice;
+      if (asset.type === 'coin') {
+        // 코인은 소수점 2자리까지 허용 (1원 고착 방지)
+        newPrice = Math.max(1, parseFloat((oldPrice * (1 + changeRate)).toFixed(2)));
+      } else {
+        newPrice = Math.max(1, Math.round(oldPrice * (1 + changeRate)));
+      }
       const changePct = ((newPrice - oldPrice) / oldPrice) * 100;
 
       market[section][ticker].open = oldPrice;
