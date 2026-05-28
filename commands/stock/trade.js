@@ -1,3 +1,4 @@
+const { checkChannel, getChannelErrorMessage } = require('../../utils/channelCheck');
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { buyAsset, sellAsset, getAsset, getPortfolio, ensureUser } = require('../../utils/marketManager');
 const { C, formatPrice } = require('../../utils/stockEmbeds');
@@ -12,6 +13,7 @@ const buyCommand = {
     .addBooleanOption(o => o.setName('confirm').setDescription('확인 없이 바로 매수').setRequired(false)),
 
   async execute(interaction) {
+    if (!checkChannel(interaction, 'stock')) return interaction.reply(getChannelErrorMessage('stock'));
     await interaction.deferReply();
 
     const ticker = interaction.options.getString('ticker').toUpperCase();
@@ -85,6 +87,7 @@ const sellCommand = {
     .addBooleanOption(o => o.setName('confirm').setDescription('확인 없이 바로 매도').setRequired(false)),
 
   async execute(interaction) {
+    if (!checkChannel(interaction, 'stock')) return interaction.reply(getChannelErrorMessage('stock'));
     await interaction.deferReply();
 
     const ticker = interaction.options.getString('ticker').toUpperCase();

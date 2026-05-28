@@ -230,8 +230,93 @@ function processOverdueLoans() {
   return results;
 }
 
+// ── 저축 (1시간마다 이자 3.3%) ──────────────────────
+function deposit(userId, amount) {
+  ensureCredit(userId);
+  const credit = loadCredit();
+  const userData = credit[userId];
+
+  const { loadUsers, saveUsers } = require('./marketManager');
+  const users = loadUsers();
+  if (!users[userId] || users[userId].balance < amount) {
+    return { success: false, message: `잔액이 부족해요! 보유: **${(users[userId]?.balance || 0).toLocaleString()}원**` };
+  }
+  if (amount < 10000) {
+    return { success: false, message: '최소 저축 금액은 **1만원**이에요!' };
+  }
+
+  users[userId].balance -= amount;
+  if (!userData.savings) userData.savings = { amount: 0, depositedAt: null, totalEarned: 0 };
+  userData.savings.amount += amount;
+  if (!userData.savings.depositedAt) userData.savings.depositedAt = new Date().toISOString();
+
+  saveUsers(users);
+  saveCredit(credit);
+  return { success: true, amount, totalSavings: userData.savings.amount };
+}
+
+function withdraw(userId, amount) {
+  ensureCredit(userId);
+  const credit = loadCredit();
+  const userData = credit[userId];
+
+  if (!userData.savings || userData.savings.amount <= 0) {
+    return { success: false, message: '저축된 금액이 없어요!' };
+  }
+
+  const withdrawAmount = amount === 0 ? userData.savings.amount : Math.min(amount, userData.savings.amount);
+
+  const { loadUsers, saveUsers } = require('./marketManager');
+  const users = loadUsers();
+  users[userId].balance += withdrawAmount;
+  userData.savings.amount -= withdrawAmount;
+  if (userData.savings.amount <= 0) {
+    userData.savings.amount = 0;
+    userData.savings.depositedAt = null;
+  }
+
+  saveUsers(users);
+  saveCredit(credit);
+  return { success: true, amount: withdrawAmount, remaining: userData.savings.amount };
+}
+
+function getSavingsInfo(userId) {
+  ensureCredit(userId);
+  const credit = loadCredit();
+  return credit[userId].savings || { amount: 0, depositedAt: null, totalEarned: 0 };
+}
+
+// 1시간마다 이자 지급 (스케줄러에서 호출)
+function applyInterest() {
+  const credit = loadCredit();
+  const RATE = 0.033; // 3.3%
+  const results = [];
+
+  for (const [userId, userData] of Object.entries(credit)) {
+    if (!userData.savings || userData.savings.amount <= 0) continue;
+
+    const interest = Math.floor(userData.savings.amount * RATE);
+    userData.savings.amount += interest;
+    userData.savings.totalEarned = (userData.savings.totalEarned || 0) + interest;
+
+    const { loadUsers, saveUsers } = require('./marketManager');
+    const users = loadUsers();
+    if (users[userId]) {
+      // 이자는 잔액에 바로 지급
+      users[userId].balance += interest;
+      saveUsers(users);
+    }
+
+    results.push({ userId, interest });
+  }
+
+  saveCredit(credit);
+  return results;
+}
+
 module.exports = {
   loadCreditAsync,
+  deposit, withdraw, getSavingsInfo, applyInterest,
   ensureCredit,
   getCreditInfo,
   applyLoan,

@@ -17,6 +17,90 @@ function setClient(discordClient) {
   client = discordClient;
 }
 
+// ── 뉴스 현황판 채널 자동 업데이트 ──────────────────
+let newsBoardMessageId = null;
+let newsBoardPage = 0; // 현재 페이지
+
+async function updateNewsBoard() {
+  if (!client) return;
+  try {
+    const { loadNews, loadConfig } = require('../utils/marketManager');
+    const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+    const config = loadConfig();
+
+    // 'Vireon News' 채널 찾기
+    let newsChannel = null;
+    for (const [, guild] of client.guilds.cache) {
+      const ch = guild.channels.cache.find(c =>
+        c.name === 'vireon-news' || c.name === 'Vireon News' ||
+        c.name === 'vireon news' || c.name === 'VireonNews'
+      );
+      if (ch) { newsChannel = ch; break; }
+    }
+    if (!newsChannel) return;
+
+    const allNews = loadNews();
+    if (allNews.length === 0) return;
+
+    const PAGE_SIZE = 8;
+    const totalPages = Math.ceil(allNews.length / PAGE_SIZE);
+    const page = Math.min(newsBoardPage, totalPages - 1);
+    const pageNews = allNews.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+    const lines = pageNews.map(n => {
+      const time = `<t:${Math.floor(new Date(n.publishedAt).getTime() / 1000)}:R>`;
+      const badge = n.isFake ? '⚠️' : n.isPositive ? '📈' : '📉';
+      return `${badge} **[${n.ticker}]** ${n.title}
+> ${time}`;
+    }).join('
+');
+
+    const embed = new EmbedBuilder()
+      .setColor(0x5865F2)
+      .setTitle('📰 Vireon 뉴스')
+      .setDescription(lines || '뉴스가 없어요.')
+      .setFooter({ text: `${page + 1} / ${totalPages} 페이지 • 총 ${allNews.length}건` })
+      .setTimestamp();
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId('news_prev')
+        .setLabel('◀ 이전')
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(page === 0),
+      new ButtonBuilder()
+        .setCustomId('news_next')
+        .setLabel('다음 ▶')
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(page >= totalPages - 1),
+      new ButtonBuilder()
+        .setCustomId('news_refresh')
+        .setLabel('🔄 새로고침')
+        .setStyle(ButtonStyle.Primary),
+    );
+
+    if (newsBoardMessageId) {
+      try {
+        const msg = await newsChannel.messages.fetch(newsBoardMessageId);
+        await msg.edit({ embeds: [embed], components: [row] });
+        return;
+      } catch (e) { newsBoardMessageId = null; }
+    }
+
+    const messages = await newsChannel.messages.fetch({ limit: 10 });
+    const existing = messages.find(m => m.author.id === client.user.id);
+    if (existing) {
+      newsBoardMessageId = existing.id;
+      await existing.edit({ embeds: [embed], components: [row] });
+    } else {
+      const sent = await newsChannel.send({ embeds: [embed], components: [row] });
+      newsBoardMessageId = sent.id;
+    }
+  } catch (e) {
+    console.error('뉴스 현황판 오류:', e.message);
+  }
+}
+
 // ── 주식 현황판 채널 자동 업데이트 ───────────────────
 async function updateStockBoard() {
   if (!client) return;
@@ -221,9 +305,13 @@ async function runHourlyTasks() {
     }
   } catch (e) { console.error('주식상장 오류:', e.message); }
 
-  // 10% 확률 코인 자동 상장
+  // 코인 30개 미만이면 무조건 상장, 30개 이상이면 10% 확률
   try {
-    if (Math.random() < 0.10) {
+    const { loadMarket } = require('../utils/marketManager');
+    const market = loadMarket();
+    const coinCount = Object.keys(market.coins || {}).length;
+    const shouldList = coinCount < 30 ? true : Math.random() < 0.10;
+    if (shouldList) {
       const result = autoListCoin();
       if (result && newsCh) {
         await newsCh.send({
@@ -375,9 +463,10 @@ async function runDailyStockEvent() {
 
 // ── 스케줄 등록 ───────────────────────────────────────
 function startScheduler() {
-  // 5분마다 — 주식 현황판 자동 업데이트
+  // 5분마다 — 주식/뉴스 현황판 자동 업데이트
   cron.schedule('*/5 * * * *', () => {
     updateStockBoard();
+    updateNewsBoard();
   });
 
   // 1분마다 — 코인 폐지 체크 (0.01% 확률)
@@ -414,10 +503,16 @@ function startScheduler() {
     }
   });
 
-  // 1시간마다 — 자동 상장/폐지
+  // 1시간마다 — 자동 상장/폐지 + 이자 지급
   cron.schedule('0 * * * *', () => {
     console.log('⏰ [CRON] 1시간 자동화');
     runHourlyTasks();
+    // 저축 이자 지급
+    try {
+      const { applyInterest } = require('../utils/bankManager');
+      const results = applyInterest();
+      if (results.length > 0) console.log(`💰 이자 지급: ${results.length}명`);
+    } catch (e) { console.error('이자 지급 오류:', e.message); }
   });
 
   // 매주 월요일 09:00 KST — 배당금
@@ -447,7 +542,7 @@ function startScheduler() {
   console.log('  - 매일 16:00: 장 마감 알림');
 
   // 봇 시작 후 30초 뒤 초기 현황판 업데이트
-  setTimeout(() => updateStockBoard(), 30000);
+  setTimeout(() => { updateStockBoard(); updateNewsBoard(); }, 30000);
 }
 
-module.exports = { startScheduler, runDailyMarketUpdate, runHourlyTasks, runCurrencyUpdate, runDailyStockEvent, updateStockBoard, setClient };
+module.exports = { startScheduler, runDailyMarketUpdate, runHourlyTasks, runCurrencyUpdate, runDailyStockEvent, updateStockBoard, updateNewsBoard, setClient, getNewsBoardState: () => ({ newsBoardPage, newsBoardMessageId }), setNewsBoardPage: (p) => { newsBoardPage = p; } };

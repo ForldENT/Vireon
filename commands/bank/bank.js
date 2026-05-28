@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { getCreditInfo, applyLoan, repayLoan, loadBankData } = require('../../utils/bankManager');
+const { checkChannel, getChannelErrorMessage } = require('../../utils/channelCheck');
 
 // ── /credit ───────────────────────────────────────────
 const creditCommand = {
@@ -9,6 +10,7 @@ const creditCommand = {
     .addUserOption(o => o.setName('user').setDescription('조회할 유저').setRequired(false)),
 
   async execute(interaction) {
+    if (!checkChannel(interaction, 'bank')) return interaction.reply(getChannelErrorMessage('bank'));
     const targetUser = interaction.options.getUser('user') || interaction.user;
     const info = getCreditInfo(targetUser.id);
     const bankData = loadBankData();
@@ -64,6 +66,7 @@ const bankCommand = {
     ),
 
   async execute(interaction) {
+    if (!checkChannel(interaction, 'bank')) return interaction.reply(getChannelErrorMessage('bank'));
     const sub = interaction.options.getSubcommand();
 
     if (sub === 'loan') {
@@ -160,6 +163,7 @@ const bankruptcyCommand = {
     .setDescription('💸 파산 신청 — 자산 초기화 후 재시작 (신용등급 1단계 하락)'),
 
   async execute(interaction) {
+    if (!checkChannel(interaction, 'bank')) return interaction.reply(getChannelErrorMessage('bank'));
     const { getCreditInfo } = require('../../utils/bankManager');
     const info = getCreditInfo(interaction.user.id);
 
@@ -193,5 +197,90 @@ const bankruptcyCommand = {
   }
 };
 
-module.exports = { creditCommand, bankCommand, bankruptcyCommand };
+
+// ── /savings ──────────────────────────────────────────
+const savingsCommand = {
+  data: new SlashCommandBuilder()
+    .setName('savings')
+    .setDescription('💵 저축 시스템 (1시간마다 이자 3.3%)')
+    .addSubcommand(sub => sub
+      .setName('deposit')
+      .setDescription('저축하기')
+      .addIntegerOption(o => o.setName('amount').setDescription('저축할 금액 (0 = 전액)').setRequired(true).setMinValue(0))
+    )
+    .addSubcommand(sub => sub
+      .setName('withdraw')
+      .setDescription('출금하기')
+      .addIntegerOption(o => o.setName('amount').setDescription('출금할 금액 (0 = 전액)').setRequired(true).setMinValue(0))
+    )
+    .addSubcommand(sub => sub
+      .setName('info')
+      .setDescription('저축 현황')
+    ),
+
+  async execute(interaction) {
+    if (!checkChannel(interaction, 'bank')) return interaction.reply(getChannelErrorMessage('bank'));
+    const sub = interaction.options.getSubcommand();
+    const { deposit, withdraw, getSavingsInfo } = require('../../utils/bankManager');
+    const { loadUsers } = require('../../utils/marketManager');
+
+    if (sub === 'deposit') {
+      let amount = interaction.options.getInteger('amount');
+      const users = loadUsers();
+      if (amount === 0) amount = users[interaction.user.id]?.balance || 0;
+
+      const result = deposit(interaction.user.id, amount);
+      return interaction.reply({
+        embeds: [new EmbedBuilder()
+          .setColor(result.success ? 0x2ECC71 : 0xFF4757)
+          .setTitle(result.success ? '💵 저축 완료!' : '❌ 저축 실패')
+          .setDescription(result.success
+            ? `**${amount.toLocaleString()}원** 저축 완료!
+총 저축액: **${result.totalSavings.toLocaleString()}원**
+💰 1시간마다 **3.3% 이자** 지급!`
+            : result.message)
+        ]
+      });
+    }
+
+    if (sub === 'withdraw') {
+      const amount = interaction.options.getInteger('amount');
+      const result = withdraw(interaction.user.id, amount);
+      return interaction.reply({
+        embeds: [new EmbedBuilder()
+          .setColor(result.success ? 0x3498DB : 0xFF4757)
+          .setTitle(result.success ? '💵 출금 완료!' : '❌ 출금 실패')
+          .setDescription(result.success
+            ? `**${result.amount.toLocaleString()}원** 출금!
+남은 저축액: **${result.remaining.toLocaleString()}원**`
+            : result.message)
+        ]
+      });
+    }
+
+    if (sub === 'info') {
+      const savings = getSavingsInfo(interaction.user.id);
+      const users = loadUsers();
+      const balance = users[interaction.user.id]?.balance || 0;
+      const nextInterest = Math.floor(savings.amount * 0.033);
+
+      return interaction.reply({
+        embeds: [new EmbedBuilder()
+          .setColor(0xF39C12)
+          .setTitle('💵 저축 현황')
+          .addFields(
+            { name: '💵 현재 잔액', value: `**${balance.toLocaleString()}원**`, inline: true },
+            { name: '🏦 저축액', value: `**${savings.amount.toLocaleString()}원**`, inline: true },
+            { name: '💰 다음 이자', value: `**+${nextInterest.toLocaleString()}원**`, inline: true },
+            { name: '📈 이자율', value: '시간당 **3.3%**', inline: true },
+            { name: '💎 총 받은 이자', value: `${(savings.totalEarned || 0).toLocaleString()}원`, inline: true },
+            { name: '📅 저축 시작', value: savings.depositedAt ? `<t:${Math.floor(new Date(savings.depositedAt).getTime()/1000)}:R>` : '없음', inline: true },
+          )
+          .setTimestamp()
+        ]
+      });
+    }
+  }
+};
+module.exports = { creditCommand, bankCommand, bankruptcyCommand, savingsCommand };
 

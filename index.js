@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const { Client, GatewayIntentBits, Collection, Events, EmbedBuilder } = require('discord.js');
-const { setClient, startScheduler } = require('./scheduler/marketScheduler');
+const { setClient, startScheduler, updateNewsBoard, setNewsBoardPage, getNewsBoardState } = require('./scheduler/marketScheduler');
 const { initializeFromDB } = require('./utils/marketManager');
 const { loadInventoryAsync } = require('./utils/miningManager');
 const { loadCreditAsync } = require('./utils/bankManager');
@@ -239,6 +239,16 @@ async function handleButton(interaction) {
   if (id === 'sell_cancel') {
     return interaction.update({ embeds: [new EmbedBuilder().setColor(C.neutral).setDescription('❌ 매도가 취소되었어요.')], components: [] });
   }
+  // 📰 뉴스 페이지 버튼
+  if (id === 'news_prev' || id === 'news_next' || id === 'news_refresh') {
+    await interaction.deferUpdate();
+    const state = getNewsBoardState();
+    if (id === 'news_prev') setNewsBoardPage(Math.max(0, state.newsBoardPage - 1));
+    if (id === 'news_next') setNewsBoardPage(state.newsBoardPage + 1);
+    await updateNewsBoard();
+    return interaction.editReply({});
+  }
+
   if (id === 'mine_again') {
     await interaction.deferReply();
     const result = mine(interaction.user.id);

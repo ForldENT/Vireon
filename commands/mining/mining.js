@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { mine, getInventory, sellMinerals, sellAllMinerals, buyTool, loadMiningData } = require('../../utils/miningManager');
+const { checkChannel, getChannelErrorMessage } = require('../../utils/channelCheck');
 
 const GRADE_COLORS = {
   SSS: 0xFF0000, SS: 0xFF6600, S: 0xFFD700,
@@ -13,6 +14,9 @@ const mineCommand = {
     .setDescription('⛏️ 광산에서 채굴합니다 (1시간 쿨다운)'),
 
   async execute(interaction) {
+    if (!checkChannel(interaction, 'mining')) {
+      return interaction.reply(getChannelErrorMessage('mining'));
+    }
     await interaction.deferReply();
 
     const result = mine(interaction.user.id);
@@ -196,6 +200,7 @@ const junkCommand = {
     ),
 
   async execute(interaction) {
+    if (!checkChannel(interaction, 'mining')) return interaction.reply(getChannelErrorMessage('mining'));
     const sub = interaction.options.getSubcommand();
     const miningData = loadMiningData();
 
@@ -277,6 +282,7 @@ const toolCommand = {
     ),
 
   async execute(interaction) {
+    if (!checkChannel(interaction, 'mining')) return interaction.reply(getChannelErrorMessage('mining'));
     const sub = interaction.options.getSubcommand();
     const miningData = loadMiningData();
 
