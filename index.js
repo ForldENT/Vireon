@@ -177,6 +177,68 @@ client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
   const command = client.commands.get(interaction.commandName);
   if (!command) return;
+
+  // ── 채널별 명령어 제한 ────────────────────────────────
+  const chName = interaction.channel?.name?.toLowerCase() || '';
+  const cmdName = interaction.commandName;
+
+  const MINING_CMDS = ['mine', 'inventory', 'junk', 'tool'];
+  const STOCK_CMDS  = ['stock', 'buy', 'sell', 'exchange', 'listing'];
+  const BANK_CMDS   = ['bank', 'credit', 'bankruptcy', 'savings'];
+  const ADMIN_CMDS  = ['admin'];
+
+  const getCmdCategory = (cmd) => {
+    if (MINING_CMDS.includes(cmd)) return 'mining';
+    if (STOCK_CMDS.includes(cmd))  return 'stock';
+    if (BANK_CMDS.includes(cmd))   return 'bank';
+    if (ADMIN_CMDS.includes(cmd))  return 'admin';
+    return 'other';
+  };
+
+  const cmdCategory = getCmdCategory(cmdName);
+
+  // admin 명령어 → 관리자 채널에서만
+  if (cmdCategory === 'admin' && !chName.includes('애덤-스미스의-보이지-않는-손')) {
+    return interaction.reply({
+      embeds: [new EmbedBuilder().setColor(0xFF4757)
+        .setDescription('🔒 `/admin` 명령어는 **#애덤-스미스의-보이지-않는-손** 채널에서만 사용할 수 있어요!')
+      ], ephemeral: true,
+    });
+  }
+
+  // 완전 차단 채널 (현황판, 뉴스)
+  const BLOCKED_CHANNELS = ['주식-현황판', '주식현황판', 'vireon-news', 'vireon news'];
+  if (BLOCKED_CHANNELS.some(k => chName.includes(k.toLowerCase()))) {
+    return interaction.reply({
+      embeds: [new EmbedBuilder().setColor(0xFF4757)
+        .setDescription('🚫 이 채널에서는 명령어를 사용할 수 없어요!')
+      ], ephemeral: true,
+    });
+  }
+
+  // 전용 채널 → 해당 카테고리만 허용
+  const DEDICATED = [
+    { keywords: ['광산'],           allowed: 'mining', label: '#광산' },
+    { keywords: ['주식-코인-시장', '주식코인시장'], allowed: 'stock',  label: '#주식-코인-시장' },
+    { keywords: ['은행'],           allowed: 'bank',   label: '#은행' },
+  ];
+
+  for (const rule of DEDICATED) {
+    if (rule.keywords.some(k => chName.includes(k.toLowerCase()))) {
+      if (cmdCategory !== rule.allowed && cmdCategory !== 'admin') {
+        const WHERE = { mining: '#광산', stock: '#주식-코인-시장', bank: '#은행', admin: '#애덤-스미스의-보이지-않는-손', other: '알맞은' };
+        return interaction.reply({
+          embeds: [new EmbedBuilder().setColor(0xFF4757)
+            .setDescription(`🚫 이 채널에서는 사용할 수 없는 명령어예요!
+\`/${cmdName}\` 은(는) **${WHERE[cmdCategory]}** 채널에서 사용해주세요.`)
+          ], ephemeral: true,
+        });
+      }
+      break;
+    }
+  }
+  // ── 채널 제한 끝 ─────────────────────────────────────
+
   try {
     await command.execute(interaction);
   } catch (err) {
