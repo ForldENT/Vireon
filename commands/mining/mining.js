@@ -59,50 +59,119 @@ const mineCommand = {
 const inventoryCommand = {
   data: new SlashCommandBuilder()
     .setName('inventory')
-    .setDescription('🎒 광물 인벤토리를 확인합니다')
-    .addUserOption(o => o.setName('user').setDescription('조회할 유저').setRequired(false)),
+    .setDescription('🎒 광물 인벤토리 / 채굴 내역')
+    .addSubcommand(sub => sub
+      .setName('items')
+      .setDescription('보유 중인 광물 목록')
+      .addUserOption(o => o.setName('user').setDescription('조회할 유저').setRequired(false))
+    )
+    .addSubcommand(sub => sub
+      .setName('history')
+      .setDescription('채굴 내역 확인')
+      .addUserOption(o => o.setName('user').setDescription('조회할 유저').setRequired(false))
+    ),
 
   async execute(interaction) {
+    const sub = interaction.options.getSubcommand();
     const targetUser = interaction.options.getUser('user') || interaction.user;
     const userData = getInventory(targetUser.id);
     const miningData = loadMiningData();
 
-    if (Object.keys(userData.minerals).length === 0) {
+    // ── 인벤토리 목록 ─────────────────────────────────
+    if (sub === 'items') {
+      if (Object.keys(userData.minerals).length === 0) {
+        return interaction.reply({
+          embeds: [new EmbedBuilder()
+            .setColor(0x95A5A6)
+            .setDescription('📦 인벤토리가 비어있어요! `/mine` 으로 채굴해보세요!')
+          ]
+        });
+      }
+
+      const gradeOrder = ['SSS', 'SS', 'S', 'A', 'B', 'C'];
+      const sortedMinerals = Object.entries(userData.minerals)
+        .sort((a, b) => gradeOrder.indexOf(a[1].grade) - gradeOrder.indexOf(b[1].grade));
+
+      const lines = sortedMinerals.map(([id, mineral]) => {
+        const gradeData = miningData.minerals[mineral.grade];
+        return `${gradeData.emoji} **[${mineral.grade}] ${mineral.name}** × ${mineral.count}개 — ${mineral.basePrice.toLocaleString()}원/개`;
+      }).join('\n');
+
+      const totalValue = sortedMinerals.reduce((sum, [, m]) => sum + m.basePrice * m.count, 0);
+      const tool = miningData.miningTools[userData.tool || 'basic'];
+      const lastMined = userData.lastMined
+        ? `<t:${Math.floor(new Date(userData.lastMined).getTime() / 1000)}:R>`
+        : '없음';
+      const cooldown = miningData.miningCooldown || 600000;
+      const nextMine = userData.lastMined
+        ? Math.max(0, Math.ceil((new Date(userData.lastMined).getTime() + cooldown - Date.now()) / 60000))
+        : 0;
+
       return interaction.reply({
         embeds: [new EmbedBuilder()
-          .setColor(0x95A5A6)
-          .setDescription('📦 인벤토리가 비어있어요! `/mine` 으로 채굴해보세요!')
+          .setColor(0x2ECC71)
+          .setTitle(`🎒 ${targetUser.username}의 광물 인벤토리`)
+          .setDescription(lines)
+          .addFields(
+            { name: '💰 총 예상 가치', value: `**${totalValue.toLocaleString()}원**`, inline: true },
+            { name: '⛏️ 현재 도구', value: `${tool.emoji} ${tool.name}`, inline: true },
+            { name: '📊 총 채굴 횟수', value: `${userData.totalMined || 0}회`, inline: true },
+            { name: '🕐 마지막 채굴', value: lastMined, inline: true },
+            { name: '⏰ 다음 채굴', value: nextMine > 0 ? `**${nextMine}분 후**` : '**지금 가능!**', inline: true },
+          )
+          .setFooter({ text: '/junk sell [광물ID] [수량] 또는 /junk sellall 로 전체 판매' })
+          .setTimestamp()
         ]
       });
     }
 
-    // 등급별 정렬
-    const gradeOrder = ['SSS', 'SS', 'S', 'A', 'B', 'C'];
-    const sortedMinerals = Object.entries(userData.minerals)
-      .sort((a, b) => gradeOrder.indexOf(a[1].grade) - gradeOrder.indexOf(b[1].grade));
+    // ── 채굴 내역 ─────────────────────────────────────
+    if (sub === 'history') {
+      const history = userData.miningHistory || [];
 
-    const lines = sortedMinerals.map(([id, mineral]) => {
-      const gradeData = miningData.minerals[mineral.grade];
-      return `${gradeData.emoji} **[${mineral.grade}] ${mineral.name}** × ${mineral.count}개 — ${mineral.basePrice.toLocaleString()}원/개`;
-    }).join('\n');
+      if (history.length === 0) {
+        return interaction.reply({
+          embeds: [new EmbedBuilder()
+            .setColor(0x95A5A6)
+            .setDescription('📋 채굴 내역이 없어요! `/mine` 으로 채굴해보세요!')
+          ]
+        });
+      }
 
-    const totalValue = sortedMinerals.reduce((sum, [, m]) => sum + m.basePrice * m.count, 0);
-    const tool = miningData.miningTools[userData.tool || 'basic'];
+      const GRADE_COLORS = { SSS: 0xFF0000, SS: 0xFF6600, S: 0xFFD700, A: 0x9B59B6, B: 0x3498DB, C: 0x95A5A6 };
+      const gradeCount = { SSS: 0, SS: 0, S: 0, A: 0, B: 0, C: 0 };
+      history.forEach(h => { if (gradeCount[h.grade] !== undefined) gradeCount[h.grade]++; });
 
-    return interaction.reply({
-      embeds: [new EmbedBuilder()
-        .setColor(0x2ECC71)
-        .setTitle(`🎒 ${targetUser.username}의 광물 인벤토리`)
-        .setDescription(lines)
-        .addFields(
-          { name: '💰 총 예상 가치', value: `**${totalValue.toLocaleString()}원**`, inline: true },
-          { name: '⛏️ 현재 도구', value: `${tool.emoji} ${tool.name}`, inline: true },
-          { name: '📊 총 채굴 횟수', value: `${userData.totalMined || 0}회`, inline: true },
-        )
-        .setFooter({ text: '/junk sell [광물ID] [수량] 또는 /junk sellall 로 전체 판매' })
-        .setTimestamp()
-      ]
-    });
+      const recentLines = history.slice(0, 15).map(h => {
+        const gradeData = miningData.minerals[h.grade];
+        const time = `<t:${Math.floor(new Date(h.date).getTime() / 1000)}:R>`;
+        return `${gradeData.emoji} **[${h.grade}] ${h.itemName}** — ${time}`;
+      }).join('\n');
+
+      const statsLines = Object.entries(gradeCount)
+        .filter(([, count]) => count > 0)
+        .map(([grade, count]) => {
+          const gradeData = miningData.minerals[grade];
+          return `${gradeData.emoji} ${grade}: **${count}회**`;
+        }).join(' | ');
+
+      return interaction.reply({
+        embeds: [new EmbedBuilder()
+          .setColor(0xF39C12)
+          .setTitle(`📋 ${targetUser.username}의 채굴 내역`)
+          .addFields(
+            { name: '📊 등급별 통계', value: statsLines || '없음', inline: false },
+            { name: `⛏️ 최근 채굴 (최대 15개)`, value: recentLines || '없음', inline: false },
+          )
+          .addFields(
+            { name: '🏆 총 채굴', value: `**${userData.totalMined || 0}회**`, inline: true },
+            { name: '💎 SSS 획득', value: `**${gradeCount.SSS}회**`, inline: true },
+            { name: '🔮 SS 획득', value: `**${gradeCount.SS}회**`, inline: true },
+          )
+          .setTimestamp()
+        ]
+      });
+    }
   }
 };
 

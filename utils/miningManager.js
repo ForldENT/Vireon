@@ -88,6 +88,17 @@ function mine(userId) {
   userData.lastMined = new Date().toISOString();
   userData.totalMined = (userData.totalMined || 0) + 1;
 
+  // 채굴 내역 저장 (최근 100개)
+  if (!userData.miningHistory) userData.miningHistory = [];
+  userData.miningHistory.unshift({
+    grade,
+    itemId: item.id,
+    itemName: item.name,
+    basePrice: item.basePrice,
+    date: new Date().toISOString(),
+  });
+  if (userData.miningHistory.length > 100) userData.miningHistory.length = 100;
+
   // 5% 확률로 주식 1주 획득
   let stockDrop = null;
   if (Math.random() < 0.05) {
