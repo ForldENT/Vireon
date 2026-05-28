@@ -11,9 +11,62 @@ const {
 } = require('../utils/autoMarket');
 
 let client = null;
+let boardMessageId = null; // 현황판 메시지 ID 캐시
 
 function setClient(discordClient) {
   client = discordClient;
+}
+
+// ── 주식 현황판 채널 자동 업데이트 ───────────────────
+async function updateStockBoard() {
+  if (!client) return;
+  try {
+    const { loadMarket, loadConfig } = require('../utils/marketManager');
+    const { marketOverviewEmbed } = require('../utils/stockEmbeds');
+    const { marketControlRow } = require('../utils/stockEmbeds');
+    const config = loadConfig();
+
+    // '주식 현황판' 채널 찾기
+    let boardChannel = null;
+    const guilds = client.guilds.cache;
+    for (const [, guild] of guilds) {
+      const ch = guild.channels.cache.find(c =>
+        c.name === '주식-현황판' || c.name === '주식 현황판' || c.name === '주식현황판'
+      );
+      if (ch) { boardChannel = ch; break; }
+    }
+
+    if (!boardChannel) return;
+
+    const market = loadMarket();
+    const embed = marketOverviewEmbed(market);
+    const row = marketControlRow();
+
+    // 기존 메시지 수정 or 새로 전송
+    if (boardMessageId) {
+      try {
+        const msg = await boardChannel.messages.fetch(boardMessageId);
+        await msg.edit({ embeds: [embed], components: [row] });
+        return;
+      } catch (e) {
+        boardMessageId = null; // 메시지 없으면 새로 만들기
+      }
+    }
+
+    // 채널의 기존 봇 메시지 찾기
+    const messages = await boardChannel.messages.fetch({ limit: 10 });
+    const existing = messages.find(m => m.author.id === client.user.id);
+    if (existing) {
+      boardMessageId = existing.id;
+      await existing.edit({ embeds: [embed], components: [row] });
+    } else {
+      // 새 메시지 전송
+      const sent = await boardChannel.send({ embeds: [embed], components: [row] });
+      boardMessageId = sent.id;
+    }
+  } catch (e) {
+    console.error('현황판 업데이트 오류:', e.message);
+  }
 }
 
 // ── 일일 시장 업데이트 ────────────────────────────────
@@ -322,6 +375,11 @@ async function runDailyStockEvent() {
 
 // ── 스케줄 등록 ───────────────────────────────────────
 function startScheduler() {
+  // 5분마다 — 주식 현황판 자동 업데이트
+  cron.schedule('*/5 * * * *', () => {
+    updateStockBoard();
+  });
+
   // 1분마다 — 코인 폐지 체크 (0.01% 확률)
   cron.schedule('* * * * *', async () => {
     if (Math.random() < 0.0001) {
@@ -384,8 +442,12 @@ function startScheduler() {
   });
 
   console.log('⏰ [스케줄러] 등록 완료');
+  console.log('  - 5분마다: 주식 현황판 자동 업데이트');
   console.log('  - 매일 09:00: 시장 업데이트 + 환율 업데이트 + 랜덤 주식 이벤트');
   console.log('  - 매일 16:00: 장 마감 알림');
+
+  // 봇 시작 후 30초 뒤 초기 현황판 업데이트
+  setTimeout(() => updateStockBoard(), 30000);
 }
 
-module.exports = { startScheduler, runDailyMarketUpdate, runHourlyTasks, runCurrencyUpdate, runDailyStockEvent, setClient };
+module.exports = { startScheduler, runDailyMarketUpdate, runHourlyTasks, runCurrencyUpdate, runDailyStockEvent, updateStockBoard, setClient };
