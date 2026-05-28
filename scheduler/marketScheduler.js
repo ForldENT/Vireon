@@ -50,10 +50,8 @@ async function updateNewsBoard() {
     const lines = pageNews.map(n => {
       const time = `<t:${Math.floor(new Date(n.publishedAt).getTime() / 1000)}:R>`;
       const badge = n.isFake ? '⚠️' : n.isPositive ? '📈' : '📉';
-      return `${badge} **[${n.ticker}]** ${n.title}
-> ${time}`;
-    }).join('
-');
+      return `${badge} **[${n.ticker}]** ${n.title}\n> ${time}`;
+    }).join('\n');
 
     const embed = new EmbedBuilder()
       .setColor(0x5865F2)
