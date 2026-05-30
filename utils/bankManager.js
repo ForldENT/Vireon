@@ -236,8 +236,13 @@ function deposit(userId, amount) {
   const credit = loadCredit();
   const userData = credit[userId];
 
-  const { loadUsers, saveUsers } = require('./marketManager');
+  const { loadUsers, saveUsers, ensureUser } = require('./marketManager');
+  ensureUser(userId);
   const users = loadUsers();
+
+  // 0이면 전액 저축
+  if (amount === 0) amount = users[userId]?.balance || 0;
+
   if (!users[userId] || users[userId].balance < amount) {
     return { success: false, message: `잔액이 부족해요! 보유: **${(users[userId]?.balance || 0).toLocaleString()}원**` };
   }
@@ -283,6 +288,8 @@ function withdraw(userId, amount) {
 function getSavingsInfo(userId) {
   ensureCredit(userId);
   const credit = loadCredit();
+  const { ensureUser } = require('./marketManager');
+  ensureUser(userId);
   return credit[userId].savings || { amount: 0, depositedAt: null, totalEarned: 0 };
 }
 
