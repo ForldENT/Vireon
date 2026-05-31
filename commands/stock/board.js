@@ -30,6 +30,17 @@ module.exports = {
     }
 
     if (sub === 'news') {
+      // DB에서 직접 뉴스 로드 후 캐시 갱신
+      try {
+        const db = require('../../utils/database');
+        const { saveNews } = require('../../utils/marketManager');
+        const newsFromDB = await db.getNews();
+        if (newsFromDB && newsFromDB.length > 0) {
+          saveNews(newsFromDB);
+        }
+      } catch (e) {
+        console.error('뉴스 강제 로드 오류:', e.message);
+      }
       await updateNewsBoard();
       return interaction.editReply({
         embeds: [new EmbedBuilder()
