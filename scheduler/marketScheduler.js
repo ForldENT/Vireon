@@ -52,13 +52,18 @@ async function updateNewsBoard() {
     const lines = pageNews.map(n => {
       const time = `<t:${Math.floor(new Date(n.publishedAt).getTime() / 1000)}:R>`;
       const badge = n.isFake ? '⚠️' : n.isPositive ? '📈' : '📉';
-      return `${badge} **[${n.ticker}]** ${n.title}\n> ${time}`;
+      // 제목 40자로 자르기
+      const title = n.title.length > 40 ? n.title.slice(0, 40) + '...' : n.title;
+      return `${badge} **[${n.ticker}]** ${title} ${time}`;
     }).join('\n');
+
+    // 4096자 제한
+    const safeLines = lines.length > 3900 ? lines.slice(0, 3900) + '\n...' : lines;
 
     const embed = new EmbedBuilder()
       .setColor(0x5865F2)
       .setTitle('📰 Vireon 뉴스')
-      .setDescription(lines || '뉴스가 없어요.')
+      .setDescription(safeLines || '뉴스가 없어요.')
       .setFooter({ text: `${page + 1} / ${totalPages} 페이지 • 총 ${allNews.length}건` })
       .setTimestamp();
 
@@ -97,7 +102,7 @@ async function updateNewsBoard() {
       newsBoardMessageId = sent.id;
     }
   } catch (e) {
-    console.error('뉴스 현황판 오류:', e.message);
+    console.error('뉴스 현황판 오류:', e.message, e.stack);
   }
 }
 
