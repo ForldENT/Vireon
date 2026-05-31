@@ -84,25 +84,37 @@ async function updateNewsBoard() {
         .setStyle(ButtonStyle.Primary),
     );
 
+    console.log(`[뉴스보드] 메시지 전송 시도... 채널ID: ${newsChannel.id}`);
+
     if (newsBoardMessageId) {
       try {
         const msg = await newsChannel.messages.fetch(newsBoardMessageId);
         await msg.edit({ embeds: [embed], components: [row] });
+        console.log('[뉴스보드] 기존 메시지 수정 완료!');
         return;
-      } catch (e) { newsBoardMessageId = null; }
+      } catch (e) {
+        console.log('[뉴스보드] 기존 메시지 수정 실패:', e.message);
+        newsBoardMessageId = null;
+      }
     }
 
-    const messages = await newsChannel.messages.fetch({ limit: 10 });
-    const existing = messages.find(m => m.author.id === client.user.id);
-    if (existing) {
-      newsBoardMessageId = existing.id;
-      await existing.edit({ embeds: [embed], components: [row] });
-    } else {
-      const sent = await newsChannel.send({ embeds: [embed], components: [row] });
-      newsBoardMessageId = sent.id;
+    try {
+      const messages = await newsChannel.messages.fetch({ limit: 10 });
+      const existing = messages.find(m => m.author.id === client.user.id);
+      if (existing) {
+        newsBoardMessageId = existing.id;
+        await existing.edit({ embeds: [embed], components: [row] });
+        console.log('[뉴스보드] 기존 메시지 편집 완료!');
+      } else {
+        const sent = await newsChannel.send({ embeds: [embed], components: [row] });
+        newsBoardMessageId = sent.id;
+        console.log('[뉴스보드] 새 메시지 전송 완료!');
+      }
+    } catch (e) {
+      console.error('[뉴스보드] 전송 실패:', e.message);
     }
   } catch (e) {
-    console.error('뉴스 현황판 오류:', e.message, e.stack);
+    console.error('[뉴스보드] 전체 오류:', e.message);
   }
 }
 
