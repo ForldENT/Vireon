@@ -28,19 +28,21 @@ async function updateNewsBoard() {
     const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
     const config = loadConfig();
 
-    // 'Vireon News' 채널 찾기
+    // 채널 찾기 — 전체 채널 목록 출력
     let newsChannel = null;
     for (const [, guild] of client.guilds.cache) {
+      console.log(`[뉴스보드] 서버: ${guild.name}, 채널 목록:`, guild.channels.cache.map(c => c.name).join(', '));
       const ch = guild.channels.cache.find(c =>
         c.name === 'vireon-news' || c.name === 'Vireon News' ||
         c.name === 'vireon news' || c.name === 'VireonNews'
       );
-      if (ch) { newsChannel = ch; break; }
+      if (ch) { newsChannel = ch; console.log(`[뉴스보드] 채널 찾음: ${ch.name}`); break; }
     }
-    if (!newsChannel) return;
+    if (!newsChannel) { console.log('[뉴스보드] 채널 못 찾음!'); return; }
 
     const allNews = loadNews();
-    if (allNews.length === 0) return;
+    console.log(`[뉴스보드] 뉴스 수: ${allNews.length}`);
+    if (allNews.length === 0) { console.log('[뉴스보드] 뉴스 없어서 종료'); return; }
 
     const PAGE_SIZE = 8;
     const totalPages = Math.ceil(allNews.length / PAGE_SIZE);
