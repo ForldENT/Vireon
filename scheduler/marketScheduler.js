@@ -11,7 +11,8 @@ const {
 } = require('../utils/autoMarket');
 
 let client = null;
-let boardMessageId = null; // 현황판 메시지 ID 캐시
+let boardMessages = {};
+let newsBoardMessages = {};
 
 function setClient(discordClient) {
   client = discordClient;
@@ -19,7 +20,7 @@ function setClient(discordClient) {
 
 // ── 뉴스 현황판 채널 자동 업데이트 ──────────────────
 let newsBoardMessageId = null;
-let newsBoardPage = 0; // 현재 페이지
+let newsBoardPage = 0;
 
 async function updateNewsBoard() {
   if (!client) return;
@@ -28,17 +29,16 @@ async function updateNewsBoard() {
     const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
     const config = loadConfig();
 
-    // 채널 찾기 — 전체 채널 목록 출력
-    let newsChannel = null;
+    // 모든 서버에서 vireon-news 채널 찾기
+    const newsChannels = [];
     for (const [, guild] of client.guilds.cache) {
-      console.log(`[뉴스보드] 서버: ${guild.name}, 채널 목록:`, guild.channels.cache.map(c => c.name).join(', '));
       const ch = guild.channels.cache.find(c =>
         c.name === 'vireon-news' || c.name === 'Vireon News' ||
         c.name === 'vireon news' || c.name === 'VireonNews'
       );
-      if (ch) { newsChannel = ch; console.log(`[뉴스보드] 채널 찾음: ${ch.name}`); break; }
+      if (ch) newsChannels.push(ch);
     }
-    if (!newsChannel) { console.log('[뉴스보드] 채널 못 찾음!'); return; }
+    if (newsChannels.length === 0) return;
 
     const allNews = loadNews();
     console.log(`[뉴스보드] 뉴스 수: ${allNews.length}`);
@@ -84,34 +84,34 @@ async function updateNewsBoard() {
         .setStyle(ButtonStyle.Primary),
     );
 
-    console.log(`[뉴스보드] 메시지 전송 시도... 채널ID: ${newsChannel.id}`);
-
-    if (newsBoardMessageId) {
+    // 모든 채널에 전송
+    for (const newsChannel of newsChannels) {
       try {
-        const msg = await newsChannel.messages.fetch(newsBoardMessageId);
-        await msg.edit({ embeds: [embed], components: [row] });
-        console.log('[뉴스보드] 기존 메시지 수정 완료!');
-        return;
-      } catch (e) {
-        console.log('[뉴스보드] 기존 메시지 수정 실패:', e.message);
-        newsBoardMessageId = null;
-      }
-    }
+        const chId = newsChannel.id;
+        if (!newsBoardMessages) newsBoardMessages = {};
+        
+        if (newsBoardMessages[chId]) {
+          try {
+            const msg = await newsChannel.messages.fetch(newsBoardMessages[chId]);
+            await msg.edit({ embeds: [embed], components: [row] });
+            continue;
+          } catch (e) {
+            delete newsBoardMessages[chId];
+          }
+        }
 
-    try {
-      const messages = await newsChannel.messages.fetch({ limit: 10 });
-      const existing = messages.find(m => m.author.id === client.user.id);
-      if (existing) {
-        newsBoardMessageId = existing.id;
-        await existing.edit({ embeds: [embed], components: [row] });
-        console.log('[뉴스보드] 기존 메시지 편집 완료!');
-      } else {
-        const sent = await newsChannel.send({ embeds: [embed], components: [row] });
-        newsBoardMessageId = sent.id;
-        console.log('[뉴스보드] 새 메시지 전송 완료!');
+        const messages = await newsChannel.messages.fetch({ limit: 10 });
+        const existing = messages.find(m => m.author.id === client.user.id);
+        if (existing) {
+          newsBoardMessages[chId] = existing.id;
+          await existing.edit({ embeds: [embed], components: [row] });
+        } else {
+          const sent = await newsChannel.send({ embeds: [embed], components: [row] });
+          newsBoardMessages[chId] = sent.id;
+        }
+      } catch (e) {
+        console.error('[뉴스보드] 전송 실패:', e.message);
       }
-    } catch (e) {
-      console.error('[뉴스보드] 전송 실패:', e.message);
     }
   } catch (e) {
     console.error('[뉴스보드] 전체 오류:', e.message);
@@ -127,43 +127,47 @@ async function updateStockBoard() {
     const { marketControlRow } = require('../utils/stockEmbeds');
     const config = loadConfig();
 
-    // '주식 현황판' 채널 찾기
-    let boardChannel = null;
-    const guilds = client.guilds.cache;
-    for (const [, guild] of guilds) {
+    // 모든 서버에서 주식현황판 채널 찾기
+    const boardChannels = [];
+    for (const [, guild] of client.guilds.cache) {
       const ch = guild.channels.cache.find(c =>
         c.name === '주식-현황판' || c.name === '주식 현황판' || c.name === '주식현황판'
       );
-      if (ch) { boardChannel = ch; break; }
+      if (ch) boardChannels.push(ch);
     }
 
-    if (!boardChannel) return;
+    if (boardChannels.length === 0) return;
 
     const market = loadMarket();
     const embed = marketOverviewEmbed(market);
     const row = marketControlRow();
 
-    // 기존 메시지 수정 or 새로 전송
-    if (boardMessageId) {
-      try {
-        const msg = await boardChannel.messages.fetch(boardMessageId);
-        await msg.edit({ embeds: [embed], components: [row] });
-        return;
-      } catch (e) {
-        boardMessageId = null; // 메시지 없으면 새로 만들기
-      }
-    }
+    if (!boardMessages) boardMessages = {};
 
-    // 채널의 기존 봇 메시지 찾기
-    const messages = await boardChannel.messages.fetch({ limit: 10 });
-    const existing = messages.find(m => m.author.id === client.user.id);
-    if (existing) {
-      boardMessageId = existing.id;
-      await existing.edit({ embeds: [embed], components: [row] });
-    } else {
-      // 새 메시지 전송
-      const sent = await boardChannel.send({ embeds: [embed], components: [row] });
-      boardMessageId = sent.id;
+    for (const boardChannel of boardChannels) {
+      try {
+        const chId = boardChannel.id;
+        if (boardMessages[chId]) {
+          try {
+            const msg = await boardChannel.messages.fetch(boardMessages[chId]);
+            await msg.edit({ embeds: [embed], components: [row] });
+            continue;
+          } catch (e) {
+            delete boardMessages[chId];
+          }
+        }
+        const messages = await boardChannel.messages.fetch({ limit: 10 });
+        const existing = messages.find(m => m.author.id === client.user.id);
+        if (existing) {
+          boardMessages[chId] = existing.id;
+          await existing.edit({ embeds: [embed], components: [row] });
+        } else {
+          const sent = await boardChannel.send({ embeds: [embed], components: [row] });
+          boardMessages[chId] = sent.id;
+        }
+      } catch (e) {
+        console.error('현황판 전송 실패:', e.message);
+      }
     }
   } catch (e) {
     console.error('현황판 업데이트 오류:', e.message);
