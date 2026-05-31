@@ -182,6 +182,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
   const chName = interaction.channel?.name?.toLowerCase() || '';
   const cmdName = interaction.commandName;
 
+  // board 커맨드는 어디서든 사용 가능
+  if (cmdName === 'board') {
+    try { await command.execute(interaction); } catch(err) {
+      console.error('커맨드 오류 (/board):', err);
+    }
+    return;
+  }
+
   const MINING_CMDS = ['mine', 'inventory', 'junk', 'tool'];
   const STOCK_CMDS  = ['stock', 'buy', 'sell', 'exchange', 'listing'];
   const BANK_CMDS   = ['bank', 'credit', 'bankruptcy', 'savings'];
