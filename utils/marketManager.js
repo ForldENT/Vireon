@@ -1,53 +1,60 @@
-const db = require('./database');
+const fs = require('fs');
+const path = require('path');
 
-// ── 메모리 캐시 ───────────────────────────────────────
-let _market = null;
-let _users = null;
-let _config = null;
-let _news = [];
+const MARKET_FILE = path.join(__dirname, '../data/market.json');
+const USERS_FILE = path.join(__dirname, '../data/users.json');
+const NEWS_FILE = path.join(__dirname, '../data/news.json');
+const CONFIG_FILE = path.join(__dirname, '../data/config.json');
 
-// ── 동기 래퍼 (기존 코드 호환) ───────────────────────
+// ── 파일 I/O ──────────────────────────────────────────
 function loadMarket() {
-  return _market || { companies: {}, coins: {}, lastUpdate: null, totalTradingDays: 0 };
+  if (!fs.existsSync(MARKET_FILE)) {
+    fs.mkdirSync(path.dirname(MARKET_FILE), { recursive: true });
+    fs.writeFileSync(MARKET_FILE, JSON.stringify({"companies":{},"coins":{},"lastUpdate":null,"totalTradingDays":0}, null, 2));
+  }
+  return JSON.parse(fs.readFileSync(MARKET_FILE, 'utf8'));
 }
 function saveMarket(data) {
-  _market = data;
-  db.saveMarket(data).catch(e => console.error('saveMarket 오류:', e.message));
+  fs.writeFileSync(MARKET_FILE, JSON.stringify(data, null, 2));
 }
 function loadUsers() {
-  return _users || {};
+  if (!fs.existsSync(USERS_FILE)) {
+    fs.mkdirSync(path.dirname(USERS_FILE), { recursive: true });
+    fs.writeFileSync(USERS_FILE, '{}');
+  }
+  return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
 }
 function saveUsers(data) {
-  _users = data;
-  db.saveUsers(data).catch(e => console.error('saveUsers 오류:', e.message));
+  fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2));
 }
 function loadNews() {
-  return _news || [];
+  if (!fs.existsSync(NEWS_FILE)) {
+    fs.mkdirSync(path.dirname(NEWS_FILE), { recursive: true });
+    fs.writeFileSync(NEWS_FILE, '[]');
+  }
+  return JSON.parse(fs.readFileSync(NEWS_FILE, 'utf8'));
 }
 function saveNews(data) {
-  _news = data;
-  db.saveNews(data).catch(e => console.error('saveNews 오류:', e.message));
+  fs.writeFileSync(NEWS_FILE, JSON.stringify(data, null, 2));
 }
 function loadConfig() {
-  return _config || {
-    startingBalance: 50000000,
-    newsChannelId: null,
-    stockChannelId: null,
-  };
+  if (!fs.existsSync(CONFIG_FILE)) {
+    fs.mkdirSync(path.dirname(CONFIG_FILE), { recursive: true });
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify({
+      startingBalance: 50000000,
+      newsChannelId: null,
+      stockChannelId: null,
+      adminRoleId: null,
+      marketOpenHour: 9,
+      marketCloseHour: 18,
+      dailyNewsCount: 3,
+      maxSingleTradePercent: 30
+    }, null, 2));
+  }
+  return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
 }
 function saveConfig(data) {
-  _config = data;
-  db.saveConfig(data).catch(e => console.error('saveConfig 오류:', e.message));
-}
-
-// ── MongoDB 초기 로드 (봇 시작시 호출) ───────────────
-async function initializeFromDB() {
-  console.log('📦 MongoDB에서 데이터 로딩...');
-  _market = await db.getMarket();
-  _users = await db.getUsers();
-  _config = await db.getConfig();
-  _news = await db.getNews();
-  console.log(`✅ 로드 완료 — 종목 ${Object.keys(_market.companies||{}).length}개, 유저 ${Object.keys(_users).length}명, 뉴스 ${_news.length}건`);
+  fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2));
 }
 
 // ── 티커 키 해석 (한글/영문/대소문자 혼용 대응) ──────
@@ -71,9 +78,26 @@ function ensureUser(userId) {
     const config = loadConfig();
     const market = loadMarket();
 
+    // 시작 코인 10개 랜덤 지급
+    const startingPortfolio = {};
+    const coinList = Object.keys(market.coins);
+    if (coinList.length > 0) {
+      const shuffled = [...coinList].sort(() => Math.random() - 0.5);
+      const picks = shuffled.slice(0, Math.min(10, coinList.length));
+      for (const ticker of picks) {
+        const coin = market.coins[ticker];
+        startingPortfolio[ticker] = {
+          qty: 10,
+          avgPrice: coin.price,
+          totalInvested: coin.price * 10,
+          currency: 'KRW',
+        };
+      }
+    }
+
     users[userId] = {
       balance: config.startingBalance,
-      portfolio: {},
+      portfolio: startingPortfolio,
       transactions: [],
       createdAt: new Date().toISOString(),
       totalPnl: 0,
@@ -104,11 +128,11 @@ function generatePriceChange(asset, newsImpact = 0) {
   let change;
 
   if (type === 'coin') {
-    // 코인: 최대 +10000%, 최소 -1000%
-    const volatility = 0.50;
+    // 코인: 최대 +1000%, 최소 -100%
+    const volatility = 0.30;
     change = rand() * volatility;
     change += newsImpact * volatility * 2;
-    change = Math.max(-10.0, Math.min(100.0, change));
+    change = Math.max(-1.0, Math.min(10.0, change));
   } else {
     // 주식: 최대 +50%, 최소 -50%
     const volatility = asset.sector === '바이오' ? 0.15 : 0.10;
@@ -131,20 +155,7 @@ function applyDailyUpdate(newsImpacts = {}) {
       const changeRate = generatePriceChange(asset, impact);
 
       const oldPrice = asset.price;
-      let newPrice;
-      if (asset.type === 'coin') {
-        const raw = oldPrice * (1 + changeRate);
-        if (oldPrice >= 10) {
-          newPrice = Math.max(1, Math.round(raw));
-        } else if (oldPrice >= 1) {
-          // 1~10원 구간: 소수점 1자리
-          newPrice = Math.max(1, parseFloat(raw.toFixed(1)));
-        } else {
-          newPrice = Math.max(1, parseFloat(raw.toFixed(2)));
-        }
-      } else {
-        newPrice = Math.max(1, Math.round(oldPrice * (1 + changeRate)));
-      }
+      const newPrice = Math.max(1, Math.round(oldPrice * (1 + changeRate)));
       const changePct = ((newPrice - oldPrice) / oldPrice) * 100;
 
       market[section][ticker].open = oldPrice;
@@ -167,10 +178,6 @@ function applyDailyUpdate(newsImpacts = {}) {
   return results;
 }
 
-// ── 쌀먹 방지 쿨다운 (종목별 마지막 매도 시간) ────────
-const sellCooldowns = {};
-const SELL_COOLDOWN_MS = 5 * 60 * 1000; // 5분
-
 // ── 매수 (환율 적용) ──────────────────────────────────
 function buyAsset(userId, ticker, quantity) {
   const user = ensureUser(userId);
@@ -178,16 +185,6 @@ function buyAsset(userId, ticker, quantity) {
   const asset = getAsset(key);
   if (!asset) return { success: false, message: `**${ticker}** 종목을 찾을 수 없어요.` };
   if (quantity <= 0) return { success: false, message: '수량은 1 이상이어야 해요.' };
-
-  // 쌀먹 방지 - 매도 후 5분간 같은 종목 매수 불가
-  const cooldownKey = `${userId}_${key}`;
-  if (sellCooldowns[cooldownKey]) {
-    const elapsed = Date.now() - sellCooldowns[cooldownKey];
-    if (elapsed < SELL_COOLDOWN_MS) {
-      const remaining = Math.ceil((SELL_COOLDOWN_MS - elapsed) / 1000);
-      return { success: false, message: `⏰ 매도 후 **${Math.ceil(remaining/60)}분 ${remaining%60}초** 후에 같은 종목을 매수할 수 있어요! (쌀먹 방지)` };
-    }
-  }
 
   const { getCurrencyByCategory, foreignToKrw, formatPriceWithKrw } = require('./currencyManager');
   const currency = getCurrencyByCategory(asset.category || 'domestic');
@@ -257,7 +254,14 @@ function sellAsset(userId, ticker, quantity) {
   const asset = getAsset(key);
   if (!asset) return { success: false, message: `**${ticker}** 종목을 찾을 수 없어요.` };
 
-  const pos = user.portfolio[key];
+  // 포트폴리오에서 대소문자 무시하고 찾기
+  let portfolioKey = key;
+  if (!user.portfolio[key]) {
+    const lowerKey = key.toLowerCase();
+    const found = Object.keys(user.portfolio).find(k => k.toLowerCase() === lowerKey);
+    if (found) portfolioKey = found;
+  }
+  const pos = user.portfolio[portfolioKey];
   if (!pos || pos.qty < quantity) {
     return { success: false, message: `보유 수량이 부족해요! 보유: **${pos?.qty || 0}주**` };
   }
@@ -276,9 +280,9 @@ function sellAsset(userId, ticker, quantity) {
   users[userId].totalPnl = (users[userId].totalPnl || 0) + pnl;
 
   if (pos.qty === quantity) {
-    delete users[userId].portfolio[key];
+    delete users[userId].portfolio[portfolioKey];
   } else {
-    users[userId].portfolio[key].qty -= quantity;
+    users[userId].portfolio[portfolioKey].qty -= quantity;
   }
 
   users[userId].transactions = users[userId].transactions || [];
@@ -296,11 +300,6 @@ function sellAsset(userId, ticker, quantity) {
   if (users[userId].transactions.length > 50) users[userId].transactions.length = 50;
 
   saveUsers(users);
-
-  // 쌀먹 방지 쿨다운 등록
-  const cooldownKey = `${userId}_${key}`;
-  sellCooldowns[cooldownKey] = Date.now();
-  setTimeout(() => delete sellCooldowns[cooldownKey], SELL_COOLDOWN_MS);
 
   const pnlEmoji = pnl >= 0 ? '📈' : '📉';
   const priceDisplay = formatPriceWithKrw(priceInCurrency, currency);
@@ -458,7 +457,6 @@ function forceSetPrice(ticker, newPrice) {
 }
 
 module.exports = {
-  initializeFromDB,
   loadMarket, saveMarket,
   loadUsers, saveUsers,
   loadNews, saveNews,
