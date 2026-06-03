@@ -299,23 +299,24 @@ function applyInterest() {
   const RATE = 0.033; // 3.3%
   const results = [];
 
+  const { loadUsers, saveUsers } = require('./marketManager');
+  const users = loadUsers(); // ← 루프 밖에서 딱 한 번만 로드
+
   for (const [userId, userData] of Object.entries(credit)) {
     if (!userData.savings || userData.savings.amount <= 0) continue;
 
+    // 저축액에 대해서만 이자 계산, 저축 원금은 건드리지 않음
     const interest = Math.floor(userData.savings.amount * RATE);
-    // 이자는 잔액으로만 지급, 저축 원금은 그대로 유지
     userData.savings.totalEarned = (userData.savings.totalEarned || 0) + interest;
 
-    const { loadUsers, saveUsers } = require('./marketManager');
-    const users = loadUsers();
     if (users[userId]) {
       users[userId].balance += interest;
-      saveUsers(users);
     }
 
     results.push({ userId, interest });
   }
 
+  saveUsers(users); // ← 루프 끝나고 딱 한 번만 저장
   saveCredit(credit);
   return results;
 }
