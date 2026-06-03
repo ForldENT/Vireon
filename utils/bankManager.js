@@ -303,13 +303,12 @@ function applyInterest() {
     if (!userData.savings || userData.savings.amount <= 0) continue;
 
     const interest = Math.floor(userData.savings.amount * RATE);
-    userData.savings.amount += interest;
+    // 이자는 잔액으로만 지급, 저축 원금은 그대로 유지
     userData.savings.totalEarned = (userData.savings.totalEarned || 0) + interest;
 
     const { loadUsers, saveUsers } = require('./marketManager');
     const users = loadUsers();
     if (users[userId]) {
-      // 이자는 잔액에 바로 지급
       users[userId].balance += interest;
       saveUsers(users);
     }
