@@ -19,7 +19,13 @@ function loadUsers() {
 }
 function saveUsers(data) {
   _users = data;
-  db.saveUsers(data).catch(e => console.error('saveUsers 오류:', e.message));
+  db.saveUsers(data).catch(e => {
+    console.error('❌ [CRITICAL] saveUsers MongoDB 저장 실패 — 캐시와 DB 불일치 발생!', e.message);
+    // 저장 실패 시 3초 후 1회 재시도
+    setTimeout(() => {
+      db.saveUsers(data).catch(e2 => console.error('❌ saveUsers 재시도도 실패:', e2.message));
+    }, 3000);
+  });
 }
 function loadNews() {
   return _news || [];
