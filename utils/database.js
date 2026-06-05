@@ -45,46 +45,13 @@ async function getUsers() {
 async function saveUsers(usersObj) {
   const database = await connect();
   const col = database.collection('users');
-
-  const ops = [];
-  for (const [userId, data] of Object.entries(usersObj)) {
-    // 기존 DB 문서 조회 (포트폴리오 삭제 감지용)
-    const existing = await col.findOne({ userId });
-    const existingPortfolio = existing?.portfolio || {};
-    const newPortfolio = data.portfolio || {};
-
-    // 중첩 객체(portfolio)를 dot notation으로 풀어서 $set — 동시 저장 시 덮어쓰기 방지
-    const flatSet = { userId };
-    for (const [key, value] of Object.entries(data)) {
-      if (key === 'portfolio' && value && typeof value === 'object') {
-        for (const [ticker, pos] of Object.entries(value)) {
-          flatSet[`portfolio.${ticker}`] = pos;
-        }
-      } else {
-        flatSet[key] = value;
-      }
+  const ops = Object.entries(usersObj).map(([userId, data]) => ({
+    updateOne: {
+      filter: { userId },
+      update: { $set: { userId, ...data } },
+      upsert: true,
     }
-
-    // 매도로 사라진 포트폴리오 종목 → $unset으로 DB에서도 제거
-    const flatUnset = {};
-    for (const ticker of Object.keys(existingPortfolio)) {
-      if (!newPortfolio[ticker]) {
-        flatUnset[`portfolio.${ticker}`] = '';
-      }
-    }
-
-    const update = { $set: flatSet };
-    if (Object.keys(flatUnset).length > 0) update.$unset = flatUnset;
-
-    ops.push({
-      updateOne: {
-        filter: { userId },
-        update,
-        upsert: true,
-      }
-    });
-  }
-
+  }));
   if (ops.length > 0) await col.bulkWrite(ops);
 }
 
@@ -210,9 +177,22 @@ async function getCredit() {
 async function saveCreditUser(userId, data) {
   const database = await connect();
   const col = database.collection('credit');
+
+  // 중첩 필드(savings, loans)를 dot notation으로 풀어서 $set — 덮어쓰기 방지
+  const flatSet = { userId };
+  for (const [key, value] of Object.entries(data)) {
+    if (key === 'savings' && value && typeof value === 'object') {
+      for (const [field, val] of Object.entries(value)) {
+        flatSet[`savings.${field}`] = val;
+      }
+    } else {
+      flatSet[key] = value;
+    }
+  }
+
   await col.updateOne(
     { userId },
-    { $set: { userId, ...data } },
+    { $set: flatSet },
     { upsert: true }
   );
 }

@@ -23,7 +23,15 @@ function loadCredit() {
 function saveCredit(data) {
   _credit = data;
   for (const [userId, userData] of Object.entries(data)) {
-    db.saveCreditUser(userId, userData).catch(() => {});
+    db.saveCreditUser(userId, userData).catch(e => {
+      console.error(`❌ [CRITICAL] saveCredit MongoDB 저장 실패 (userId: ${userId}):`, e.message);
+      // 저장 실패 시 3초 후 1회 재시도
+      setTimeout(() => {
+        db.saveCreditUser(userId, userData).catch(e2 =>
+          console.error(`❌ saveCredit 재시도 실패 (userId: ${userId}):`, e2.message)
+        );
+      }, 3000);
+    });
   }
 }
 
@@ -294,29 +302,30 @@ function getSavingsInfo(userId) {
 }
 
 // 1시간마다 이자 지급 (스케줄러에서 호출)
+// 1시간마다 이자 지급 (스케줄러에서 호출)
 function applyInterest() {
   const credit = loadCredit();
   const RATE = 0.033; // 3.3%
   const results = [];
 
   const { loadUsers, saveUsers } = require('./marketManager');
-  const users = loadUsers(); // ← 루프 밖에서 딱 한 번만 로드
+  const users = loadUsers(); // 루프 밖에서 딱 한 번만 로드
 
   for (const [userId, userData] of Object.entries(credit)) {
     if (!userData.savings || userData.savings.amount <= 0) continue;
 
-    // 저축액에 대해서만 이자 계산, 저축 원금은 건드리지 않음
+    // 저축액에 대해서만 이자 계산 — 저축 원금은 건드리지 않음
     const interest = Math.floor(userData.savings.amount * RATE);
     userData.savings.totalEarned = (userData.savings.totalEarned || 0) + interest;
 
     if (users[userId]) {
-      users[userId].balance += interest;
+      users[userId].balance += interest; // 이자는 잔액으로만 지급
     }
 
     results.push({ userId, interest });
   }
 
-  saveUsers(users); // ← 루프 끝나고 딱 한 번만 저장
+  saveUsers(users); // 루프 끝나고 딱 한 번만 저장
   saveCredit(credit);
   return results;
 }
